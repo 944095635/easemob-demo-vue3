@@ -15,7 +15,7 @@ import { initUIKit } from '@/utils/uikit'
 // import LoginCaptcha from '../LoginCaptcha/index.vue'
 
 interface Props {
-  /** 开发者模式：展示 userId + token 登录，用于 dev 环境直接连接 UIKit */
+  /** userId + token 登录：开发者模式（dev 构建）与生产构建均启用 */
   devMode?: boolean
 }
 
@@ -65,16 +65,18 @@ onMounted(() => {
   devUserId.value = config.devUserId
   devToken.value = config.devToken
 
-  // 生产环境且启用阿里云验证码时，初始化滑块验证
-  destroyAliyunCaptcha = initAliyunCaptcha({
-    onVerify: async (captchaVerifyParam) => {
-      const ok = await sendSms(phone.value, undefined, captchaVerifyParam)
-      if (!ok && smsError.value) {
-        loginError.value = smsError.value
-        resetAliyunCaptcha()
-      }
-    },
-  })
+  // userId + token 登录模式下不初始化滑块验证；仅手机号 + 验证码流程需要
+  if (!props.devMode) {
+    destroyAliyunCaptcha = initAliyunCaptcha({
+      onVerify: async (captchaVerifyParam) => {
+        const ok = await sendSms(phone.value, undefined, captchaVerifyParam)
+        if (!ok && smsError.value) {
+          loginError.value = smsError.value
+          resetAliyunCaptcha()
+        }
+      },
+    })
+  }
 })
 
 onUnmounted(() => {

@@ -14,6 +14,9 @@ const { t, locale } = useI18n()
 // 开发者模式：统一由 useDevMode 管理（dev 构建默认开启、生产默认关闭），单击退出、连点 7 次进入
 const { devEnabled, remaining, isHinting, registerTap, exitDevMode } = useDevMode()
 
+// userId + token 登录：生产构建固定启用，开发构建沿用开发者模式开关
+const tokenLoginEnabled = computed(() => import.meta.env.PROD || devEnabled.value)
+
 // 连点提示 toast（分段反馈：前 4 次静默，之后提示「再点 X 次」）
 const devToast = ref('')
 const devToastVisible = ref(false)
@@ -124,7 +127,7 @@ function handleDevIconClick() {
               <LoginDevConfig v-show="devEnabled" @exit="exitDevMode" />
 
               <!-- 登录表单 -->
-              <LoginForm :dev-mode="devEnabled" />
+              <LoginForm :dev-mode="tokenLoginEnabled" />
             </div>
 
             <!-- 底部 shimmer 线 -->
