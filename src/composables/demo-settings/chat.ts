@@ -15,13 +15,18 @@ function createChatSettings() {
   /* ===== 聊天输入框配置 ===== */
   const chatInputMode = ref<'simple' | 'rich'>('simple')
   const chatInputStyle = ref<'toolbar-top' | 'toolbar-bottom'>('toolbar-top')
+  // multiBody 默认关闭：选图/视频/文件后立即发送，不进输入框附件草稿。
+  // 背景：UIKit 在 multiBody=true 时，PC 端选图会先转为附件草稿，与文字合并成复合消息发送，
+  // 该混排路径存在「丢失文字或图片」问题；关闭后走 UIKit 原生 send-file 即发流程（PC simple + H5 本就即发），
+  // 且引用(msgQuote)/@(em_at_list)/离线推送 ext 均会保留。设置面板开关仍可手动打开恢复图文混排。
+  // 注意：rich 模式下关闭 multiBody 时图片会内联插入编辑器（UIKit 既定行为），非即发。
   const chatInputFeatures = ref({
     emoji: true,
     image: true,
     file: true,
     voice: true,
     video: true,
-    multiBody: true,
+    multiBody: false,
     mention: true,
   })
   const chatInputAutoFocus = ref(false)
@@ -75,7 +80,7 @@ function createChatSettings() {
       file: true,
       voice: true,
       video: true,
-      multiBody: true,
+      multiBody: false,
       mention: true,
     }
     chatInputAutoFocus.value = false
