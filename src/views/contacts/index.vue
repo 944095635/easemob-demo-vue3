@@ -37,6 +37,7 @@ const {
   contactShowContactEntry,
   contactShowGroupEntry,
   contactShowBlocklist,
+  contactShowHomeAddButton,
   contactShowContactAddButton,
   contactShowGroupCreateButton,
   contactShowBlocklistAddButton,
@@ -190,6 +191,7 @@ function backToContactList() {
           :show-contact="contactShowContactEntry"
           :show-group="contactShowGroupEntry"
           :show-blocklist="contactShowBlocklist"
+          :show-home-add-button="contactShowHomeAddButton"
           :show-contact-add-button="contactShowContactAddButton"
           :show-group-create-button="contactShowGroupCreateButton"
           :show-blocklist-add-button="contactShowBlocklistAddButton"
@@ -238,6 +240,7 @@ function backToContactList() {
           :show-contact="contactShowContactEntry"
           :show-group="contactShowGroupEntry"
           :show-blocklist="contactShowBlocklist"
+          :show-home-add-button="contactShowHomeAddButton"
           :show-contact-add-button="contactShowContactAddButton"
           :show-group-create-button="contactShowGroupCreateButton"
           :show-blocklist-add-button="contactShowBlocklistAddButton"
