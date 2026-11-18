@@ -50,7 +50,7 @@ const { t: tUI, locale: uikitLocale } = useLocale()
 const hasCurrentConversation = computed(() => !!currentConversation.value)
 
 /**
- * 会话列表右上角「+」菜单项：去掉内置「添加联系人」，保留新建会话 / 创建群组。
+ * 会话列表右上角「+」菜单项：去掉内置「添加联系人」「创建群组」，仅保留新建会话。
  * 传空数组会隐藏整个 + 入口；这里显式列出保留项，走 UIKit 内置 key 打开对应弹窗。
  * 文案取 UIKit i18n，随语言切换响应式更新。
  */
@@ -62,11 +62,6 @@ const conversationMenuItems = computed<ConversationHeaderMenuItem[]>(() => {
       key: 'newChat',
       label: tUI('conversation.newChat'),
       icon: 'bubble/rect/empty',
-    },
-    {
-      key: 'createGroup',
-      label: tUI('conversation.createGroup'),
-      icon: 'person/double',
     },
   ]
 })
