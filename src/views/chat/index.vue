@@ -9,10 +9,15 @@ import {
   EmResizable,
   useConversation,
   useConversationTabs,
+  useLocale,
   useUIKit,
   useViewport,
 } from '@easemob-community/uikit-im'
-import type { ConversationTabKey, UiMessage } from '@easemob-community/uikit-im'
+import type {
+  ConversationHeaderMenuItem,
+  ConversationTabKey,
+  UiMessage,
+} from '@easemob-community/uikit-im'
 
 import MarkdownStreamMessage from '@/components/ai/MarkdownStreamMessage.vue'
 import ChatWatermark from '@/components/chat/ChatWatermark.vue'
@@ -40,8 +45,31 @@ const isMobileView = useMobileView()
 const { isMobile } = useViewport()
 const { currentConversation, leaveConversation, refreshConversationPreviews } = useConversation()
 const { demoCreateGroup } = useDemoCreateGroup()
+const { t: tUI, locale: uikitLocale } = useLocale()
 
 const hasCurrentConversation = computed(() => !!currentConversation.value)
+
+/**
+ * 会话列表右上角「+」菜单项：去掉内置「添加联系人」，保留新建会话 / 创建群组。
+ * 传空数组会隐藏整个 + 入口；这里显式列出保留项，走 UIKit 内置 key 打开对应弹窗。
+ * 文案取 UIKit i18n，随语言切换响应式更新。
+ */
+const conversationMenuItems = computed<ConversationHeaderMenuItem[]>(() => {
+  // 依赖 uikitLocale，确保切换语言时重新取文案（tUI 本身非 ref）
+  void uikitLocale.value
+  return [
+    {
+      key: 'newChat',
+      label: tUI('conversation.newChat'),
+      icon: 'bubble/rect/empty',
+    },
+    {
+      key: 'createGroup',
+      label: tUI('conversation.createGroup'),
+      icon: 'person/double',
+    },
+  ]
+})
 
 // 进入页面及切换语言时仅重算摘要，不覆盖草稿、免打扰、名称、头像或本地独有会话
 watch(locale, () => refreshConversationPreviews(), { immediate: true })
@@ -286,6 +314,7 @@ watch(
       >
         <EmConversationContainer
           :pull-refresh="isMobile && DEMO_CONVERSATION_CONFIG.pullRefresh"
+          :menu-items="conversationMenuItems"
           :tabs="effectiveConversationTabs"
           :active-tab="effectiveConversationActiveTab"
           :show-status-banner="statusBannerEnabled"
@@ -341,6 +370,7 @@ watch(
       <div v-show="!hasCurrentConversation" class="chat-page__mobile-list">
         <EmConversationContainer
           :pull-refresh="DEMO_CONVERSATION_CONFIG.pullRefresh"
+          :menu-items="conversationMenuItems"
           :tabs="effectiveConversationTabs"
           :active-tab="effectiveConversationActiveTab"
           :show-status-banner="statusBannerEnabled"
