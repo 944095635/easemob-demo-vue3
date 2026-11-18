@@ -37,3 +37,4 @@ dist-ssr
 # Local documentation archives and agent process drafts
 /docs/quick-start.zip
 /docs/superpowers/
+.workbuddy/

@@ -6,6 +6,7 @@ import { useClient } from '@easemob-community/uikit-im'
 
 import { useUserStore } from '@/store/modules/user'
 import { initUIKit } from '@/utils/uikit'
+import { useMessagePushExt } from '@/composables/useMessagePushExt'
 import { useNewMessageNotice } from '@/composables/useNewMessageNotice'
 
 interface Props {
@@ -24,6 +25,9 @@ const router = useRouter()
 
 // 页面在后台时收到新消息，标签页标题闪烁提示（依赖 Provider 作用域，需在 useClient 同一上下文）
 useNewMessageNotice()
+
+// 发送时统一给消息 ext 注入离线推送模板（登录后安装，覆盖自动登录与手动登录）
+useMessagePushExt()
 
 /** 是否存在可自动登录的凭证（刷新页面后由 user store 从 sessionStorage 恢复） */
 const hasCredentials = Boolean(userStore.token && userStore.userId && props.appKey)
