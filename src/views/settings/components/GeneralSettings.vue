@@ -2,8 +2,7 @@
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { onClickOutside } from '@vueuse/core'
-import { EmIcon, useUIKit, useTheme as useUIKitTheme } from '@easemob-community/uikit-im'
-import { isKeyboardShortcutsEnabled, setKeyboardShortcutsEnabled } from '@easemob-community/uikit-im'
+import { EmIcon, useTheme as useUIKitTheme } from '@easemob-community/uikit-im'
 
 import { useDemoSettings } from '@/composables/useDemoSettings'
 import { useTheme, type ThemeMode } from '@/composables/useTheme'
@@ -13,14 +12,7 @@ defineOptions({ name: 'GeneralSettings' })
 const { t, locale } = useI18n()
 const { mode: themeMode, setMode: setThemeMode } = useTheme()
 const uikitTheme = useUIKitTheme()
-const { stores } = useUIKit()
 const { notificationEnable } = useDemoSettings()
-
-/** 显示输入状态：接入 UIKit 会话 store 的 typingEnabled */
-const showTyping = computed({
-  get: () => stores.conversation.typingEnabled,
-  set: (value) => stores.conversation.setTypingEnabled(value),
-})
 
 /** 暗黑模式：跟随系统 / 浅色 / 深色 三档，Demo 与 UIKit 主题同步切换 */
 function selectThemeMode(value: ThemeMode) {
@@ -28,16 +20,6 @@ function selectThemeMode(value: ThemeMode) {
   uikitTheme.setMode(value)
   darkModeOpen.value = false
 }
-
-/** 键盘操作：直连 UIKit 全局键盘快捷键开关（Esc 关闭弹层、方向键切换导航项等） */
-const keyboardState = ref(isKeyboardShortcutsEnabled())
-const keyboardEnabled = computed({
-  get: () => keyboardState.value,
-  set: (value) => {
-    setKeyboardShortcutsEnabled(value)
-    keyboardState.value = value
-  },
-})
 
 /* ===== 下拉弹层（暗黑模式 / 语言设置）：同一时刻仅展开一个 ===== */
 const darkModeOpen = ref(false)
@@ -106,19 +88,8 @@ function selectLanguage(value: string) {
     </div>
 
     <div class="general-settings__body">
-      <!-- 第一组：显示输入状态 / 暗黑模式 / 语言设置 -->
+      <!-- 第一组：暗黑模式 / 语言设置 -->
       <div class="general-settings__group">
-        <div class="general-settings__item">
-          <div class="general-settings__row">
-            <span class="general-settings__label">{{ t('settings.general.showTyping') }}</span>
-            <label class="general-settings__switch">
-              <input v-model="showTyping" type="checkbox" />
-              <span class="general-settings__switch-track" />
-            </label>
-          </div>
-          <p class="general-settings__hint">{{ t('settings.general.showTypingHint') }}</p>
-        </div>
-
         <div ref="darkModeWrapperRef" class="general-settings__item general-settings__popup-wrapper">
           <div
             class="general-settings__row general-settings__row--clickable"
@@ -212,21 +183,6 @@ function selectLanguage(value: string) {
         </div>
       </div>
 
-      <!-- 第三组：键盘操作 -->
-      <div class="general-settings__group">
-        <div class="general-settings__item">
-          <div class="general-settings__row">
-            <span class="general-settings__label">{{
-              t('settings.general.keyboardOperation')
-            }}</span>
-            <label class="general-settings__switch">
-              <input v-model="keyboardEnabled" type="checkbox" />
-              <span class="general-settings__switch-track" />
-            </label>
-          </div>
-          <p class="general-settings__hint">{{ t('settings.general.keyboardOperationHint') }}</p>
-        </div>
-      </div>
     </div>
   </div>
 </template>
