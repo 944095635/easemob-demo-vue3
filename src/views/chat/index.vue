@@ -20,7 +20,6 @@ import type {
 } from '@easemob-community/uikit-im'
 
 import MarkdownStreamMessage from '@/components/ai/MarkdownStreamMessage.vue'
-import ChatWatermark from '@/components/chat/ChatWatermark.vue'
 import EmptyStateNotice from '@/components/common/EmptyStateNotice.vue'
 import AddContactModal from '@/components/contact/AddContactModal.vue'
 import { useDemoCreateGroup } from '@/composables/useDemoCreateGroup'
@@ -350,9 +349,6 @@ watch(
           <template #empty>
             <EmptyStateNotice />
           </template>
-          <template #watermark>
-            <ChatWatermark :text="t('chat.watermark')" />
-          </template>
           <template #message-text="{ message }">
             <MarkdownStreamMessage :message="message as UiMessage" />
           </template>
@@ -406,9 +402,6 @@ watch(
         </div>
         <div class="chat-page__mobile-body">
           <EmChatContainer :config="chatConfig">
-            <template #watermark>
-              <ChatWatermark :text="t('chat.watermark')" />
-            </template>
             <template #message-text="{ message }">
               <MarkdownStreamMessage :message="message as UiMessage" />
             </template>
