@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onUnmounted, ref, watch } from 'vue'
+import { computed, onUnmounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import {
   EmChatContainer,
@@ -9,14 +9,12 @@ import {
   EmResizable,
   useConversation,
   useConversationTabs,
-  useToast,
   useUIKit,
   useViewport,
 } from '@easemob-community/uikit-im'
 import type { ConversationTabKey, UiMessage } from '@easemob-community/uikit-im'
 
 import MarkdownStreamMessage from '@/components/ai/MarkdownStreamMessage.vue'
-import AntiFraudBanner from '@/components/chat/AntiFraudBanner.vue'
 import ChatWatermark from '@/components/chat/ChatWatermark.vue'
 import EmptyStateNotice from '@/components/common/EmptyStateNotice.vue'
 import AddContactModal from '@/components/contact/AddContactModal.vue'
@@ -144,19 +142,6 @@ watch(
 
 // 离开聊天页兜底复位，避免其他页面 tabbar 消失
 onUnmounted(showTabbar)
-
-/* ===== 防诈骗提示条（#notice 插槽，关闭态仅当前会话内隐藏，切换会话重新展示——对齐 React demo 行为） ===== */
-const { success: showToastSuccess } = useToast()
-const antiFraudBannerClosed = ref(false)
-
-// 切换会话时重新展示防诈骗提示条
-watch(currentConversation, () => {
-  antiFraudBannerClosed.value = false
-})
-
-function onAntiFraudReport() {
-  showToastSuccess(t('chat.antiFraud.reportToast'))
-}
 
 /* ===== 会话列表宽度（默认 360px + EmResizable 拖拽定宽 + localStorage 持久化） ===== */
 
@@ -344,13 +329,6 @@ watch(
           <template #watermark>
             <ChatWatermark :text="t('chat.watermark')" />
           </template>
-          <template #notice>
-            <AntiFraudBanner
-              v-if="!antiFraudBannerClosed"
-              @close="antiFraudBannerClosed = true"
-              @report="onAntiFraudReport"
-            />
-          </template>
           <template #message-text="{ message }">
             <MarkdownStreamMessage :message="message as UiMessage" />
           </template>
@@ -405,13 +383,6 @@ watch(
           <EmChatContainer :config="chatConfig">
             <template #watermark>
               <ChatWatermark :text="t('chat.watermark')" />
-            </template>
-            <template #notice>
-              <AntiFraudBanner
-                v-if="!antiFraudBannerClosed"
-                @close="antiFraudBannerClosed = true"
-                @report="onAntiFraudReport"
-              />
             </template>
             <template #message-text="{ message }">
               <MarkdownStreamMessage :message="message as UiMessage" />
