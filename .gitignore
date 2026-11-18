@@ -10,6 +10,8 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+# Electron 打包产物（安装包，体积大，不入库；build/icon.png 是源资源需保留）
+release
 *.local
 # 敏感配置备份文件（防止 .env.production.local.bak 等被提交）
 *.bak

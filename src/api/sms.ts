@@ -6,7 +6,7 @@
  * - 注册 / 重置密码：图片验证码 → POST /inside/app/sms/send
  * - 前置：GET /inside/app/image 获取图片验证码
  *
- * 请求使用独立 axios 实例，baseURL 固定为环信域名（协议跟随当前页面），
+ * 请求使用独立 axios 实例，baseURL 固定为环信域名（固定 https 协议），
  * 不经过本地代理，也不携带用户 token（短信接口本身不需要登录态）。
  */
 
@@ -18,8 +18,14 @@ import { captchaConfig } from '@/config/captcha'
 // 常量
 // ------------------------------------------------------------------
 
-/** 环信线上正式域名 */
-const EASEMOB_BASE_URL = `${window.location.protocol}//a1.easemob.com`
+/**
+ * 环信线上正式域名（固定 https）。
+ *
+ * 不能用 `window.location.protocol` 拼接：Electron 打包后页面运行在本地 HTTP 服务
+ * （如 http://127.0.0.1:PORT）下，拼出的 http://a1.easemob.com 依赖后端 301 跳转；
+ * 更重要的是历史打包方案（file:// / 自定义协议）下会拼出非法 URL。固定 https 让 Web 与桌面端一致。
+ */
+export const EASEMOB_BASE_URL = 'https://a1.easemob.com'
 
 /** 手机号校验正则 */
 export const PHONE_REGEX = /^1[3-9]\d{9}$/

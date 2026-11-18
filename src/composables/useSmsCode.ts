@@ -1,6 +1,7 @@
 import { ref } from 'vue'
 
 import {
+  EASEMOB_BASE_URL,
   encryptAES,
   getImageCaptcha,
   mapLoginSmsError,
@@ -80,7 +81,7 @@ export function useSmsCode(scene: SmsScene) {
       imageId.value = id
       imageEnabled.value = enabled
       if (enabled && id) {
-        imageCaptchaUrl.value = `${window.location.protocol}//a1.easemob.com/inside/app/image/${id}`
+        imageCaptchaUrl.value = `${EASEMOB_BASE_URL}/inside/app/image/${id}`
       } else {
         imageCaptchaUrl.value = ''
       }

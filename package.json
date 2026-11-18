@@ -3,6 +3,7 @@
   "version": "0.8.0",
   "private": true,
   "type": "module",
+  "main": "electron/main.cjs",
   "packageManager": "pnpm@10.24.0",
   "engines": {
     "node": ">=20.19.0"
@@ -16,7 +17,12 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write \"src/**/*.{ts,vue,css,scss}\"",
-    "release": "node scripts/release.mjs"
+    "release": "node scripts/release.mjs",
+    "electron:dev": "pnpm build && env -u ELECTRON_RUN_AS_NODE electron .",
+    "build:electron": "pnpm build && electron-builder",
+    "build:electron:mac": "pnpm build && electron-builder --mac",
+    "build:electron:win": "pnpm build && electron-builder --win",
+    "build:electron:linux": "pnpm build && electron-builder --linux"
   },
   "dependencies": {
     "@easemob-community/uikit-im": "^3.13.0",
@@ -39,6 +45,8 @@
     "@types/nprogress": "^0.2.3",
     "@vitejs/plugin-vue": "^6.0.8",
     "axios-mock-adapter": "^2.1.0",
+    "electron": "^45.3.4",
+    "electron-builder": "^26.18.0",
     "eruda": "^3.4.3",
     "eslint": "^10.9.0",
     "eslint-config-prettier": "^10.1.8",
