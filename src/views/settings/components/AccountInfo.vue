@@ -33,7 +33,7 @@ const { presenceStatus } = usePresenceSubscription(userId)
 
     <div class="account-info__body">
       <div class="account-info__content">
-        <ProfileDisplay :user-id="userId" :presence="presenceStatus" />
+        <ProfileDisplay :presence="presenceStatus" />
 
         <!-- 三行包一层：ProfileEditor / AvatarSection 为多根节点组件，不包层会被 content 的
              gap 63px 当作独立子元素撑开行间间距（设计稿行间仅 1px 分割线、无间距） -->
