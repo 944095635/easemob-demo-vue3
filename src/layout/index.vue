@@ -13,12 +13,7 @@ import {
 import type { UiContactInvite } from '@easemob-community/uikit-im'
 import { useRoute } from 'vue-router'
 
-import featurePromoArrowImg from '@/assets/feature-promo-arrow.svg'
-import featurePromoCharacterImg from '@/assets/feature-promo-character.png'
-import featurePromoCloseImg from '@/assets/feature-promo-close.svg'
 import CheckUpdates from '@/components/CheckUpdates.vue'
-import FeaturePromoTitle from '@/components/FeaturePromoTitle.vue'
-import { useFeaturePromo } from '@/composables/useFeaturePromo'
 import { useMobileTabbar } from '@/composables/useMobileTabbar'
 import { useMobileView } from '@/composables/useMobileView'
 import { useSettingsDrawer } from '@/composables/useSettingsDrawer'
@@ -32,15 +27,8 @@ const isMobileView = useMobileView()
 const { isTabbarHidden } = useMobileTabbar()
 const {
   isOpen: isSettingsDrawerOpen,
-  toggle: toggleSettingsDrawer,
   close: closeSettingsDrawer,
 } = useSettingsDrawer()
-const {
-  showRedDot: showFeatureRedDot,
-  showPromo: showFeaturePromo,
-  dismissRedDot,
-  closePromo,
-} = useFeaturePromo()
 const { t } = useI18n()
 const route = useRoute()
 const { currentUser } = useClient()
@@ -115,12 +103,6 @@ const pendingNoticeCount = computed(() => {
   ).length
 })
 
-/** 点击特性图标：打开/收起设置抽屉，并隐藏诱导红点 */
-function handleFeaturesClick() {
-  dismissRedDot()
-  toggleSettingsDrawer()
-}
-
 /* 路由切换（H5 底部 tabbar / PC 侧边栏导航）时自动收起设置抽屉：
    抽屉是布局级浮层，跨页面保留会让它罩在无关页面上 */
 watch(
@@ -128,14 +110,6 @@ watch(
   () => closeSettingsDrawer(),
 )
 
-/** 点击广告弹层：进入特性控制台（设置抽屉）并关闭弹层 */
-function handlePromoClick() {
-  dismissRedDot()
-  closePromo()
-  if (!isSettingsDrawerOpen.value) {
-    toggleSettingsDrawer()
-  }
-}
 </script>
 
 <template>
@@ -175,56 +149,6 @@ function handlePromoClick() {
       </nav>
 
       <div class="app-layout__tools">
-        <div class="app-layout__features-entry">
-          <button
-            type="button"
-            class="app-layout__tool-btn"
-            :class="{ 'app-layout__tool-btn--active': isSettingsDrawerOpen }"
-            :aria-label="t('nav.features')"
-            @click="handleFeaturesClick"
-          >
-            <span class="app-layout__feature-icon-wrap">
-              <EmIcon :name="isSettingsDrawerOpen ? 'filled/console' : 'console'" :size="24" />
-              <span v-if="showFeatureRedDot" class="app-layout__red-dot" />
-            </span>
-          </button>
-          <!-- 特性广告弹层：登录后默认展示，关闭后下次登录再次展示。
-               结构容器尺寸固定（设计稿 755-13747），图片仅作内容填充，
-               弹层定位不依赖图片加载与资产内嵌坐标，换素材无需重新校准 -->
-          <Transition name="feature-promo">
-            <div
-              v-if="showFeaturePromo && !isSettingsDrawerOpen"
-              class="app-layout__feature-promo"
-              @click="handlePromoClick"
-            >
-              <div class="app-layout__feature-promo-inner">
-                <img
-                  class="app-layout__feature-promo-arrow"
-                  :src="featurePromoArrowImg"
-                  alt=""
-                  aria-hidden="true"
-                />
-                <div class="app-layout__feature-promo-card">
-                  <FeaturePromoTitle class="app-layout__feature-promo-title" />
-                  <p class="app-layout__feature-promo-desc" v-text="t('nav.featurePromoDesc')" />
-                </div>
-                <img
-                  class="app-layout__feature-promo-character"
-                  :src="featurePromoCharacterImg"
-                  alt=""
-                />
-                <button
-                  type="button"
-                  class="app-layout__feature-promo-close"
-                  :aria-label="t('common.close')"
-                  @click.stop="closePromo"
-                >
-                  <img :src="featurePromoCloseImg" alt="" />
-                </button>
-              </div>
-            </div>
-          </Transition>
-        </div>
         <router-link class="app-layout__tool-btn" to="/settings" :aria-label="t('nav.settings')">
           <EmIcon name="hamburger" :size="24" />
         </router-link>
