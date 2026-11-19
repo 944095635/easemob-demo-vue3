@@ -4,6 +4,7 @@ import { MESSAGE_TYPE } from '@easemob-community/uikit-im'
 import type { UiMessage } from '@easemob-community/uikit-im'
 
 import { getCustomEvent, isUnsupportedCustomMessage } from '@/utils/customMessage'
+import { BIDIRECTIONAL_EVENT } from '@/utils/bidirectionalMessage'
 
 function msg(type: string, body: Record<string, unknown> = {}): UiMessage {
   return { type, body } as unknown as UiMessage
@@ -23,10 +24,16 @@ describe('getCustomEvent', () => {
 })
 
 describe('isUnsupportedCustomMessage', () => {
-  it('所有 custom 消息默认视为不支持（白名单为空）', () => {
+  it('默认 custom 消息视为不支持', () => {
     expect(isUnsupportedCustomMessage(msg(MESSAGE_TYPE.CUSTOM, { event: 'any_event' }))).toBe(true)
     expect(isUnsupportedCustomMessage(msg(MESSAGE_TYPE.CUSTOM, { event: '' }))).toBe(true)
     expect(isUnsupportedCustomMessage(msg(MESSAGE_TYPE.CUSTOM))).toBe(true)
+  })
+
+  it('bidirectional 已支持专用渲染，不算不支持', () => {
+    expect(
+      isUnsupportedCustomMessage(msg(MESSAGE_TYPE.CUSTOM, { event: BIDIRECTIONAL_EVENT })),
+    ).toBe(false)
   })
 
   it('非 custom 类型一律不是「不支持的自定义消息」', () => {

@@ -21,6 +21,7 @@ import type {
 } from '@easemob-community/uikit-im'
 
 import MarkdownStreamMessage from '@/components/ai/MarkdownStreamMessage.vue'
+import BidirectionalMessage from '@/components/chat/BidirectionalMessage.vue'
 import UnsupportedCustomTip from '@/components/chat/UnsupportedCustomTip.vue'
 import EmptyStateNotice from '@/components/common/EmptyStateNotice.vue'
 import AddContactModal from '@/components/contact/AddContactModal.vue'
@@ -30,6 +31,7 @@ import { useMobileTabbar } from '@/composables/useMobileTabbar'
 import { useMobileView } from '@/composables/useMobileView'
 import { useSidebarWidth } from '@/composables/useSidebarWidth'
 import { getMockAiReply, simulateStreamMessage } from '@/composables/useStreamDemo'
+import { isBidirectionalMessage } from '@/utils/bidirectionalMessage'
 import { isUnsupportedCustomMessage } from '@/utils/customMessage'
 import { trackEvent } from '@/utils/analytics'
 import {
@@ -355,10 +357,14 @@ watch(
           <template #message-text="{ message }">
             <MarkdownStreamMessage :message="message as UiMessage" />
           </template>
-          <!-- 自定义消息：不支持的显示系统消息样式提示，支持的回落 UIKit 内置渲染 -->
+          <!-- 自定义消息：bidirectional 走专用系统样式渲染；其余不支持的显示提示；支持的回落内置 -->
           <template #message-custom="{ message }">
+            <BidirectionalMessage
+              v-if="isBidirectionalMessage(message as UiMessage)"
+              :message="message as UiMessage"
+            />
             <UnsupportedCustomTip
-              v-if="isUnsupportedCustomMessage(message as UiMessage)"
+              v-else-if="isUnsupportedCustomMessage(message as UiMessage)"
               :message="message as UiMessage"
             />
             <EmCustomMessage v-else :message="message as UiMessage" />
@@ -417,8 +423,12 @@ watch(
               <MarkdownStreamMessage :message="message as UiMessage" />
             </template>
             <template #message-custom="{ message }">
+              <BidirectionalMessage
+                v-if="isBidirectionalMessage(message as UiMessage)"
+                :message="message as UiMessage"
+              />
               <UnsupportedCustomTip
-                v-if="isUnsupportedCustomMessage(message as UiMessage)"
+                v-else-if="isUnsupportedCustomMessage(message as UiMessage)"
                 :message="message as UiMessage"
               />
               <EmCustomMessage v-else :message="message as UiMessage" />
@@ -563,10 +573,11 @@ watch(
 </style>
 
 <!-- 非 scoped：#message-custom 插槽只替换消息内容，外层 wrapper 仍带头像/昵称/气泡。
-     用 :has() 命中含本项目锚点类 .unsupported-custom-tip 的消息行，抵消其外壳并居中，
-     外观与 UIKit 系统消息（notice）一致。锚点类为本组件独有，不会误伤其它消息。 -->
+     用 :has() 命中含本项目锚点类（.unsupported-custom-tip / .bidirectional-tip）的消息行，
+     抵消其外壳并居中，外观与 UIKit 系统消息（notice）一致。锚点类为本组件独有，不误伤其它消息。 -->
 <style lang="scss">
-.message-bubble-wrapper:has(.unsupported-custom-tip) {
+.message-bubble-wrapper:has(.unsupported-custom-tip),
+.message-bubble-wrapper:has(.bidirectional-tip) {
   justify-content: center;
 
   .message-bubble-wrapper__main {
