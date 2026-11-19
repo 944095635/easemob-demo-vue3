@@ -10,8 +10,32 @@
  */
 
 const http = require('node:http')
+const https = require('node:https')
 const fs = require('node:fs')
 const path = require('node:path')
+
+/** OSS/CDN 反代配置（与 src/utils/ossAccess.ts 的默认值一致，可用环境变量覆盖） */
+const OSS_CDN_HOST = (process.env.ELECTRON_OSS_CDN_HOST || 'cdnv2.cntlyun.com').trim()
+const OSS_REFERER = (process.env.ELECTRON_OSS_REFERER || `https://${OSS_CDN_HOST}/`).trim()
+const OSS_PROXY_PREFIX = '/oss-cdn'
+
+/**
+ * 把 /oss-cdn 路径转成上游 CDN URL。
+ * 例：/oss-cdn/public/avatar/1.jpg?t=1 → https://cdnv2.cntlyun.com/public/avatar/1.jpg?t=1
+ * 已做前缀规范化（确保单个 /），避免拼出 // 导致协议相对 URL 或路径穿越。
+ */
+function resolveOssUpstream(requestUrl) {
+  const parsed = new URL(requestUrl, 'http://localhost')
+  const pathname = decodeURIComponent(parsed.pathname)
+  if (pathname !== OSS_PROXY_PREFIX && !pathname.startsWith(`${OSS_PROXY_PREFIX}/`)) return null
+
+  let rest = pathname.slice(OSS_PROXY_PREFIX.length)
+  if (!rest.startsWith('/')) rest = `/${rest}`
+  // 折叠重复前导斜杠：https://host + //evil 会被当成协议相对，这里强制单斜杠
+  rest = `/${rest.replace(/^\/+/, '')}`
+
+  return { url: `https://${OSS_CDN_HOST}${rest}${parsed.search}`, referer: OSS_REFERER }
+}
 
 /** MIME 类型映射（覆盖本项目 dist 实际会产出的扩展名） */
 const MIME_TYPES = {
@@ -67,6 +91,53 @@ function resolveFile(root, pathname) {
 }
 
 /**
+ * 转发 /oss-cdn 请求到 CDN 并注入 Referer。
+ * - 只放行 GET/HEAD（createServer 顶层已限制）
+ * - 回传状态码与内容头（content-type / content-length / cache-control 等）；不转发 hop-by-hop 头
+ * - 上游 3xx 重定向时透传 Location（CDN 偶发跳转，浏览器会带上本应用 Referer 重发）
+ * - 网络错误 / 超时返回 502，避免渲染进程挂起
+ */
+function proxyOssRequest(upstream, req, res) {
+  const upstreamReq = https.request(
+    upstream.url,
+    {
+      method: req.method,
+      headers: {
+        Referer: upstream.referer,
+        Host: OSS_CDN_HOST,
+        Accept: req.headers.accept || '*/*',
+        'User-Agent': req.headers['user-agent'] || 'electron',
+      },
+    },
+    (upstreamRes) => {
+      const headers = {}
+      for (const [name, value] of Object.entries(upstreamRes.headers)) {
+        if (
+          ['content-type', 'content-length', 'cache-control', 'etag', 'last-modified', 'location'].includes(
+            name.toLowerCase(),
+          ) &&
+          value !== undefined
+        ) {
+          headers[name] = value
+        }
+      }
+      res.writeHead(upstreamRes.statusCode || 502, headers)
+      upstreamRes.pipe(res)
+    },
+  )
+  upstreamReq.setTimeout(15000, () => upstreamReq.destroy(new Error('OSS upstream timeout')))
+  upstreamReq.on('error', (err) => {
+    if (res.headersSent) {
+      res.destroy()
+      return
+    }
+    res.writeHead(502, { 'Content-Type': 'text/plain; charset=utf-8' })
+    res.end(`OSS upstream error: ${err.message}`)
+  })
+  upstreamReq.end()
+}
+
+/**
  * 创建静态服务。
  *
  * @param {string} rootDir 静态根目录（dist/ 的绝对路径）
@@ -88,6 +159,14 @@ function createStaticServer(rootDir) {
     } catch {
       res.writeHead(400)
       res.end('Bad Request')
+      return
+    }
+
+    // OSS/CDN 头像反代：浏览器无法给 <img> 设置 Referer，前端把 OSS 头像改写到
+    // /oss-cdn 同源路径，这里转发到 CDN 并注入防盗链 Referer（等价 Flutter OssHttpOverrides）。
+    const upstream = resolveOssUpstream(req.url || '/')
+    if (upstream) {
+      proxyOssRequest(upstream, req, res)
       return
     }
 
@@ -130,4 +209,4 @@ function createStaticServer(rootDir) {
   })
 }
 
-module.exports = { createStaticServer, resolveFile, MIME_TYPES }
+module.exports = { createStaticServer, resolveFile, resolveOssUpstream, MIME_TYPES }

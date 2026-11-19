@@ -15,6 +15,12 @@ interface ImportMetaEnv {
   readonly VITE_CAPTCHA_SECRET?: string
   /** UIKit 接入：环信 AppKey（格式 xxxx#xxxx），未配置时 Provider 不初始化 SDK */
   readonly VITE_APP_KEY?: string
+  /** OSS/CDN 头像读链路：CDN 域名（默认 cdnv2.cntlyun.com），须与 vite.config.ts 代理一致 */
+  readonly VITE_OSS_CDN_HOST?: string
+  /** OSS/CDN 头像读链路：防盗链 Referer（默认 https://<CDN host>/） */
+  readonly VITE_OSS_REFERER?: string
+  /** OSS/CDN 头像读链路：是否启用同源 /oss-cdn 改写（默认启用；无反代的环境设 false 关闭） */
+  readonly VITE_OSS_PROXY_ENABLED?: string
 }
 
 interface ImportMeta {

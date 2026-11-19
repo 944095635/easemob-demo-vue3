@@ -79,6 +79,32 @@ function buildCompressionPlugin(): Plugin {
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd())
 
+  // OSS/CDN 头像读链路（对齐 Flutter OssAccess）：桶开启 Referer 防盗链，浏览器无法给 <img>
+  // 设置 Referer，故头像 src 被改写为同源 /oss-cdn 路径，由此代理转发并注入 Referer。
+  // 默认值与 src/utils/ossAccess.ts 的常量一致；可用环境变量覆盖（呼应 Dart OssAccess.apply）。
+  const ossCdnHost = (env.VITE_OSS_CDN_HOST || 'cdnv2.cntlyun.com').trim()
+  const ossReferer = (env.VITE_OSS_REFERER || `https://${ossCdnHost}/`).trim()
+
+  // dev（server）与生产预览（preview）共用同一套代理。真实静态生产部署由 nginx 提供
+  // 同名 /oss-cdn 反代（见 AGENTS.md 部署小节），Electron 由 static-server.cjs 内置。
+  const apiProxy = {
+    target: env.VITE_PROXY_TARGET || 'http://localhost:8080',
+    changeOrigin: true,
+    rewrite: (path: string) => path.replace(/^\/api/, ''),
+  }
+  // 头像/图片 OSS 分发代理：src/utils/ossAccess.ts 把 OSS/CDN 绝对 URL 改写为
+  // /oss-cdn/<path>，这里去掉前缀转发到 CDN，并注入防盗链要求的 Referer 头。
+  // 对齐 Flutter OssHttpOverrides 的「GET 改写到 CDN + 附加 Referer」逻辑。
+  const ossCdnProxy = {
+    target: `https://${ossCdnHost}`,
+    changeOrigin: true,
+    // 重定向（如 CDN 301）时也带上 Referer，避免跳转后再次 403
+    followRedirects: true,
+    headers: { Referer: ossReferer },
+    rewrite: (path: string) => path.replace(/^\/oss-cdn/, ''),
+  }
+  const proxy = { '/api': apiProxy, '/oss-cdn': ossCdnProxy }
+
   return {
     plugins: [vue(), buildCompressionPlugin()],
     define: {
@@ -95,14 +121,13 @@ export default defineConfig(({ mode }) => {
     server: {
       port: 5173,
       open: false,
-      proxy: {
-        // 后端接口代理，按需调整 target
-        '/api': {
-          target: env.VITE_PROXY_TARGET || 'http://localhost:8080',
-          changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/api/, ''),
-        },
-      },
+      proxy,
+    },
+    // 生产构建预览（pnpm preview）也挂同样代理，方便本地验证生产产物的头像链路；
+    // 注意这只是本地预览，真实静态生产部署仍需 nginx 反代（见 AGENTS.md）。
+    preview: {
+      port: 4173,
+      proxy,
     },
   }
 })

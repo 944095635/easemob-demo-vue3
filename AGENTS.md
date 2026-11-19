@@ -127,6 +127,19 @@ pnpm release     # 正式打版：node scripts/release.mjs <major|minor|patch>�
 
   若部署在 CDN / 托管平台（多数会按需自动 gzip/brotli），生成的预压缩文件无副作用，可忽略上述配置。
 
+- **OSS/CDN 头像反代**：头像托管在阿里云 OSS/CDN（`cdnv2.cntlyun.com` / `tie-lian-v2.oss-cn-chengdu.aliyuncs.com`），开启了 Referer 防盗链白名单——只有 `Referer: https://cdnv2.cntlyun.com/` 才返回图片，浏览器直连一律 403。移植自 Flutter `OssHttpOverrides` 的读链路：前端（dev 与 prod 均默认开启）把 OSS 头像绝对 URL 改写为同源 `/oss-cdn/<path>`，再由同源代理注入 Referer。三种形态的代理来源：dev 走 `vite.config.ts` 的 `server.proxy`；Electron 走 `electron/static-server.cjs` 内置反代（开箱即用）；**Web 静态部署必须在 nginx 配同名反代**，否则改写后的头像路径 404：
+
+  ```nginx
+  location /oss-cdn/ {
+      proxy_pass https://cdnv2.cntlyun.com/;   # 末尾 / 去掉 /oss-cdn 前缀
+      proxy_set_header Host cdnv2.cntlyun.com;
+      proxy_set_header Referer https://cdnv2.cntlyun.com/;  # 防盗链白名单要求
+      proxy_hide_header Content-Disposition;   # 避免个别资源被当成附件下载
+  }
+  ```
+
+  若 CDN host / Referer 与默认值不同，同步改 `vite.config.ts`、`electron/static-server.cjs`（`ELECTRON_OSS_CDN_HOST` / `ELECTRON_OSS_REFERER` 环境变量）与 `VITE_OSS_*`。若某部署形态无法配反代，设 `VITE_OSS_PROXY_ENABLED=false` 关闭改写，头像退回直连 OSS（可能 403）。
+
 ## Skills
 
 项目级 skills 存放在 `.agent/skills/`，按需加载：

@@ -15,6 +15,8 @@ import { applyUIKitLocaleOverrides } from './config/uikit-locale'
 import { useDevMode } from './composables/useDevMode'
 import { useTheme } from './composables/useTheme'
 import { isMobile } from './utils/env'
+import { applyOssAccess } from './utils/ossAccess'
+import { installAvatarSrcRewrite } from './utils/avatarSrcRewrite'
 import { setupBaiduAnalytics } from './utils/analytics'
 
 import 'nprogress/nprogress.css'
@@ -28,6 +30,25 @@ applyDemoContainerConfig()
 
 // 覆盖 UIKit 内置文案（添加联系人弹窗输入框支持手机号或用户 ID）
 applyUIKitLocaleOverrides()
+
+// OSS/CDN 头像读链路（移植自 Flutter OssHttpOverrides）：用环境变量覆盖读链路配置，
+// 再全局接管 <img src>，把 OSS 头像改写为同源 /oss-cdn 路径，由同源代理注入 Referer
+// 头解决 403 denied by Referer ACL。须在 app 挂载、UIKit 渲染头像前安装。
+//
+// 开发环境：Vite server.proxy 的 /oss-cdn 代理（vite.config.ts）。
+// 正式环境（Web 静态）：需 nginx 配同名 /oss-cdn 反代，见 AGENTS.md 部署小节。
+// 正式环境（Electron）：electron/static-server.cjs 内置 /oss-cdn 反代，开箱即用。
+// 若某部署形态没有 /oss-cdn 反代，把 VITE_OSS_PROXY_ENABLED=false 即可关闭改写，
+// 头像退回直连 OSS（可能 403），避免改写后路径 404。
+if (import.meta.env.VITE_OSS_PROXY_ENABLED !== 'false') {
+  applyOssAccess({
+    publicBase: import.meta.env.VITE_OSS_CDN_HOST
+      ? `https://${import.meta.env.VITE_OSS_CDN_HOST}`
+      : undefined,
+    referer: import.meta.env.VITE_OSS_REFERER,
+  })
+  installAvatarSrcRewrite()
+}
 
 // 百度统计：仅生产环境加载（import.meta.env.PROD 守卫，见 src/utils/analytics.ts）
 setupBaiduAnalytics()
