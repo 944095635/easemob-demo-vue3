@@ -16,9 +16,11 @@ import type { UiMessage } from '@easemob-community/uikit-im'
  * 已在 Web 端支持渲染的自定义消息 event 白名单。
  * - bidirectional：双向消息，由独立的 BidirectionalMessage 组件渲染（见 chat/index.vue
  *   #message-custom 插槽）。内容走 self/other 逻辑，不能显示 event/params 原文。
+ * - emoji：自定义表情消息，由 EmojiMessage 组件渲染（见 chat/index.vue #message-custom
+ *   插槽）。params 里的 url 以裸图展示，不能显示 event/params 原文。
  * 其余 custom 消息走「请用手机 App 查看」提示。
  */
-const SUPPORTED_CUSTOM_EVENTS = new Set<string>(['bidirectional'])
+const SUPPORTED_CUSTOM_EVENTS = new Set<string>(['bidirectional', 'emoji'])
 
 /** 取自定义消息的 event 标识；非 custom 或无 event 时返回空串 */
 export function getCustomEvent(message: UiMessage): string {

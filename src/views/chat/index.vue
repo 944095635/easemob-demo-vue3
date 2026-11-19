@@ -22,6 +22,7 @@ import type {
 
 import MarkdownStreamMessage from '@/components/ai/MarkdownStreamMessage.vue'
 import BidirectionalMessage from '@/components/chat/BidirectionalMessage.vue'
+import EmojiMessage from '@/components/chat/EmojiMessage.vue'
 import UnsupportedCustomTip from '@/components/chat/UnsupportedCustomTip.vue'
 import EmptyStateNotice from '@/components/common/EmptyStateNotice.vue'
 import AddContactModal from '@/components/contact/AddContactModal.vue'
@@ -32,6 +33,7 @@ import { useMobileView } from '@/composables/useMobileView'
 import { useSidebarWidth } from '@/composables/useSidebarWidth'
 import { getMockAiReply, simulateStreamMessage } from '@/composables/useStreamDemo'
 import { isBidirectionalMessage } from '@/utils/bidirectionalMessage'
+import { isEmojiMessage } from '@/utils/customEmojiMessage'
 import { isUnsupportedCustomMessage } from '@/utils/customMessage'
 import { trackEvent } from '@/utils/analytics'
 import {
@@ -357,10 +359,15 @@ watch(
           <template #message-text="{ message }">
             <MarkdownStreamMessage :message="message as UiMessage" />
           </template>
-          <!-- 自定义消息：bidirectional 走专用系统样式渲染；其余不支持的显示提示；支持的回落内置 -->
+          <!-- 自定义消息：bidirectional 走系统样式；emoji 渲染为裸图并支持点击预览；
+               其余不支持的显示提示；支持的回落内置 -->
           <template #message-custom="{ message }">
             <BidirectionalMessage
               v-if="isBidirectionalMessage(message as UiMessage)"
+              :message="message as UiMessage"
+            />
+            <EmojiMessage
+              v-else-if="isEmojiMessage(message as UiMessage)"
               :message="message as UiMessage"
             />
             <UnsupportedCustomTip
@@ -425,6 +432,10 @@ watch(
             <template #message-custom="{ message }">
               <BidirectionalMessage
                 v-if="isBidirectionalMessage(message as UiMessage)"
+                :message="message as UiMessage"
+              />
+              <EmojiMessage
+                v-else-if="isEmojiMessage(message as UiMessage)"
                 :message="message as UiMessage"
               />
               <UnsupportedCustomTip
