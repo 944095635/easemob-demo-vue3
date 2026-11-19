@@ -23,6 +23,7 @@ import type {
 import MarkdownStreamMessage from '@/components/ai/MarkdownStreamMessage.vue'
 import BidirectionalMessage from '@/components/chat/BidirectionalMessage.vue'
 import EmojiMessage from '@/components/chat/EmojiMessage.vue'
+import NoteMessage from '@/components/chat/NoteMessage.vue'
 import UnsupportedCustomTip from '@/components/chat/UnsupportedCustomTip.vue'
 import EmptyStateNotice from '@/components/common/EmptyStateNotice.vue'
 import AddContactModal from '@/components/contact/AddContactModal.vue'
@@ -34,6 +35,7 @@ import { useSidebarWidth } from '@/composables/useSidebarWidth'
 import { getMockAiReply, simulateStreamMessage } from '@/composables/useStreamDemo'
 import { isBidirectionalMessage } from '@/utils/bidirectionalMessage'
 import { isEmojiMessage } from '@/utils/customEmojiMessage'
+import { isNoteMessage } from '@/utils/noteMessage'
 import { isUnsupportedCustomMessage } from '@/utils/customMessage'
 import { trackEvent } from '@/utils/analytics'
 import {
@@ -359,8 +361,8 @@ watch(
           <template #message-text="{ message }">
             <MarkdownStreamMessage :message="message as UiMessage" />
           </template>
-          <!-- 自定义消息：bidirectional 走系统样式；emoji 渲染为裸图并支持点击预览；
-               其余不支持的显示提示；支持的回落内置 -->
+          <!-- 自定义消息：bidirectional 走系统样式；emoji 渲染为裸图；note 渲染为笔记卡片；
+               均支持点击预览；其余不支持的显示提示；支持的回落内置 -->
           <template #message-custom="{ message }">
             <BidirectionalMessage
               v-if="isBidirectionalMessage(message as UiMessage)"
@@ -368,6 +370,10 @@ watch(
             />
             <EmojiMessage
               v-else-if="isEmojiMessage(message as UiMessage)"
+              :message="message as UiMessage"
+            />
+            <NoteMessage
+              v-else-if="isNoteMessage(message as UiMessage)"
               :message="message as UiMessage"
             />
             <UnsupportedCustomTip
@@ -436,6 +442,10 @@ watch(
               />
               <EmojiMessage
                 v-else-if="isEmojiMessage(message as UiMessage)"
+                :message="message as UiMessage"
+              />
+              <NoteMessage
+                v-else-if="isNoteMessage(message as UiMessage)"
                 :message="message as UiMessage"
               />
               <UnsupportedCustomTip

@@ -6,6 +6,7 @@ import type { UiMessage } from '@easemob-community/uikit-im'
 import { getCustomEvent, isUnsupportedCustomMessage } from '@/utils/customMessage'
 import { BIDIRECTIONAL_EVENT } from '@/utils/bidirectionalMessage'
 import { EMOJI_EVENT } from '@/utils/customEmojiMessage'
+import { NOTE_EVENT } from '@/utils/noteMessage'
 
 function msg(type: string, body: Record<string, unknown> = {}): UiMessage {
   return { type, body } as unknown as UiMessage
@@ -39,6 +40,10 @@ describe('isUnsupportedCustomMessage', () => {
 
   it('emoji 已支持专用渲染，不算不支持', () => {
     expect(isUnsupportedCustomMessage(msg(MESSAGE_TYPE.CUSTOM, { event: EMOJI_EVENT }))).toBe(false)
+  })
+
+  it('note 已支持专用渲染，不算不支持', () => {
+    expect(isUnsupportedCustomMessage(msg(MESSAGE_TYPE.CUSTOM, { event: NOTE_EVENT }))).toBe(false)
   })
 
   it('非 custom 类型一律不是「不支持的自定义消息」', () => {
