@@ -22,6 +22,7 @@ import type {
 
 import MarkdownStreamMessage from '@/components/ai/MarkdownStreamMessage.vue'
 import BidirectionalMessage from '@/components/chat/BidirectionalMessage.vue'
+import CardMessage from '@/components/chat/CardMessage.vue'
 import EmojiMessage from '@/components/chat/EmojiMessage.vue'
 import NoteMessage from '@/components/chat/NoteMessage.vue'
 import UnsupportedCustomTip from '@/components/chat/UnsupportedCustomTip.vue'
@@ -34,6 +35,7 @@ import { useMobileView } from '@/composables/useMobileView'
 import { useSidebarWidth } from '@/composables/useSidebarWidth'
 import { getMockAiReply, simulateStreamMessage } from '@/composables/useStreamDemo'
 import { isBidirectionalMessage } from '@/utils/bidirectionalMessage'
+import { isCardMessage } from '@/utils/cardMessage'
 import { isEmojiMessage } from '@/utils/customEmojiMessage'
 import { isNoteMessage } from '@/utils/noteMessage'
 import { isUnsupportedCustomMessage } from '@/utils/customMessage'
@@ -362,7 +364,7 @@ watch(
             <MarkdownStreamMessage :message="message as UiMessage" />
           </template>
           <!-- 自定义消息：bidirectional 走系统样式；emoji 渲染为裸图；note 渲染为笔记卡片；
-               均支持点击预览；其余不支持的显示提示；支持的回落内置 -->
+               card/userCard 渲染为名片卡片；均支持点击预览；其余不支持的显示提示；支持的回落内置 -->
           <template #message-custom="{ message }">
             <BidirectionalMessage
               v-if="isBidirectionalMessage(message as UiMessage)"
@@ -374,6 +376,10 @@ watch(
             />
             <NoteMessage
               v-else-if="isNoteMessage(message as UiMessage)"
+              :message="message as UiMessage"
+            />
+            <CardMessage
+              v-else-if="isCardMessage(message as UiMessage)"
               :message="message as UiMessage"
             />
             <UnsupportedCustomTip
@@ -444,16 +450,20 @@ watch(
                 v-else-if="isEmojiMessage(message as UiMessage)"
                 :message="message as UiMessage"
               />
-              <NoteMessage
-                v-else-if="isNoteMessage(message as UiMessage)"
-                :message="message as UiMessage"
-              />
-              <UnsupportedCustomTip
-                v-else-if="isUnsupportedCustomMessage(message as UiMessage)"
-                :message="message as UiMessage"
-              />
-              <EmCustomMessage v-else :message="message as UiMessage" />
-            </template>
+            <NoteMessage
+              v-else-if="isNoteMessage(message as UiMessage)"
+              :message="message as UiMessage"
+            />
+            <CardMessage
+              v-else-if="isCardMessage(message as UiMessage)"
+              :message="message as UiMessage"
+            />
+            <UnsupportedCustomTip
+              v-else-if="isUnsupportedCustomMessage(message as UiMessage)"
+              :message="message as UiMessage"
+            />
+            <EmCustomMessage v-else :message="message as UiMessage" />
+          </template>
           </EmChatContainer>
         </div>
       </div>

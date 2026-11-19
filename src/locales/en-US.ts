@@ -30,6 +30,8 @@ export default {
     unsupportedCustomMessage: 'This message is not supported here. Please open it in the mobile app.',
     noteLabel: 'Note',
     noteFallback: 'Note',
+    cardLabel: 'Business Card',
+    cardExpired: 'This business card has expired',
     messagePreview: {
       image: 'Image',
     },

@@ -30,6 +30,8 @@ export default {
     unsupportedCustomMessage: '该消息暂不支持查看，请使用手机 App 打开',
     noteLabel: '笔记',
     noteFallback: '笔记',
+    cardLabel: '名片',
+    cardExpired: '名片已过期',
     messagePreview: {
       image: '图片',
     },
