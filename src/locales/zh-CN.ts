@@ -27,6 +27,7 @@ export default {
   },
   chat: {
     watermark: '环信Demo 仅供参考，谨防诈骗！',
+    unsupportedCustomMessage: '该消息暂不支持查看，请使用手机 App 打开',
     messagePreview: {
       image: '图片',
     },

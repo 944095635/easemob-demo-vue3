@@ -27,6 +27,7 @@ export default {
   },
   chat: {
     watermark: 'Easemob Demo · For reference only · Beware of scams!',
+    unsupportedCustomMessage: 'This message is not supported here. Please open it in the mobile app.',
     messagePreview: {
       image: 'Image',
     },
