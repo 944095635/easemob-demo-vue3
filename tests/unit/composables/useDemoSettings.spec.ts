@@ -229,7 +229,7 @@ describe('useDemoSettings（会话UIKIT特性开关）', () => {
     expect(settings.noticeTone.value).toBe('default')
   })
 
-  it('Provider 能力开关默认全部开启（单聊昵称、已读回执除外），自定义数据源默认关闭', () => {
+  it('Provider 能力开关默认全部开启（单聊昵称、已读回执、用户资料实时订阅除外），自定义数据源默认关闭', () => {
     const settings = useDemoSettings()
 
     expect(settings.providerEnableContact.value).toBe(true)
@@ -245,7 +245,8 @@ describe('useDemoSettings（会话UIKIT特性开关）', () => {
     expect(settings.providerEnableFetchContacts.value).toBe(false)
     expect(settings.providerEnableGroup.value).toBe(true)
     expect(settings.providerEnableUserInfo.value).toBe(true)
-    expect(settings.providerEnableUserInfoSubscription.value).toBe(true)
+    // 当前集群未开通用户资料订阅服务，开启会导致登录后弹 warning toast，故默认关闭
+    expect(settings.providerEnableUserInfoSubscription.value).toBe(false)
     expect(settings.providerFilterBlockedContacts.value).toBe(true)
     expect(settings.providerEnableToast.value).toBe(true)
     expect(settings.providerContactFetchMode.value).toBe('page')
@@ -284,7 +285,8 @@ describe('useDemoSettings（会话UIKIT特性开关）', () => {
     expect(settings.providerEnableFetchContacts.value).toBe(false)
     expect(settings.providerEnableGroup.value).toBe(true)
     expect(settings.providerEnableUserInfo.value).toBe(true)
-    expect(settings.providerEnableUserInfoSubscription.value).toBe(true)
+    // 当前集群未开通用户资料订阅服务，开启会导致登录后弹 warning toast，故默认关闭
+    expect(settings.providerEnableUserInfoSubscription.value).toBe(false)
     expect(settings.providerFilterBlockedContacts.value).toBe(true)
     expect(settings.providerEnableToast.value).toBe(true)
     expect(settings.providerContactFetchMode.value).toBe('page')

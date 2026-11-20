@@ -79,7 +79,7 @@ describe('DEMO_CHAT_CONFIG（EmChatContainer 聊天页面配置，对齐 UIKit d
 })
 
 describe('组件静态属性配置（uikit 组件模板中的静态值）', () => {
-  it('Provider 能力开关默认全部开启（单聊昵称除外），自定义数据源默认关闭', () => {
+  it('Provider 能力开关默认全部开启（单聊昵称、用户资料实时订阅除外），自定义数据源默认关闭', () => {
     expect(DEMO_PROVIDER_CONFIG.enableContact).toBe(true)
     expect(DEMO_PROVIDER_CONFIG.enableBlocklist).toBe(true)
     expect(DEMO_PROVIDER_CONFIG.enablePresence).toBe(true)
@@ -91,7 +91,8 @@ describe('组件静态属性配置（uikit 组件模板中的静态值）', () =
     expect(DEMO_PROVIDER_CONFIG.enableFetchContacts).toBe(false)
     expect(DEMO_PROVIDER_CONFIG.enableGroup).toBe(true)
     expect(DEMO_PROVIDER_CONFIG.enableUserInfo).toBe(true)
-    expect(DEMO_PROVIDER_CONFIG.enableUserInfoSubscription).toBe(true)
+    // 当前集群未开通用户资料订阅服务，开启会导致登录后弹 warning toast，故默认关闭
+    expect(DEMO_PROVIDER_CONFIG.enableUserInfoSubscription).toBe(false)
     expect(DEMO_PROVIDER_CONFIG.filterBlockedContacts).toBe(true)
     expect(DEMO_PROVIDER_CONFIG.enableToast).toBe(true)
     expect(DEMO_PROVIDER_CONFIG.contactFetchMode).toBe('page')

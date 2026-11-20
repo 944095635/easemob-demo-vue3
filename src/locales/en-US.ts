@@ -490,7 +490,7 @@ export default {
       notes: {
         afterEnable: 'When on:',
         defaultAllOn:
-          'Provider capability switches are all on by default (single-chat nickname off, custom data source off). When off, the corresponding feature will no longer pull / render / send.',
+          'Provider capability switches are all on by default (single-chat nickname, custom data source, and user info subscription are off). When off, the corresponding feature will no longer pull / render / send.',
         readOnMount:
           'Note: these switches are read when the Provider mounts; after logging in, you need to log in again (or refresh the page) for changes to take full effect.',
         customDataSource:

@@ -98,8 +98,9 @@ export const DEMO_CONVERSATION_CONFIG = {
  * EmUIKitProvider 功能开关
  *
  * 与「UIKit 特性开关 - Provider」面板一一对应。
- * 除昵称展示开关（showNicknameInSingleChat 默认关闭）、自定义数据源（enableFetchContacts 默认关闭）
- * 与已读回执总开关（enableReadReceipt 因 Prod 集群已读回执问题临时默认关闭）外，
+ * 除昵称展示开关（showNicknameInSingleChat 默认关闭）、自定义数据源（enableFetchContacts 默认关闭）、
+ * 已读回执总开关（enableReadReceipt 因 Prod 集群已读回执问题临时默认关闭）与用户资料实时订阅开关
+ * （enableUserInfoSubscription 因当前集群未开通订阅服务、登录后会弹 warning toast 而默认关闭）外，
  * 其余开关默认全部开启，见面板说明「Provider 能力开关默认全部开启」。
  * 由 useDemoSettings 读取作为默认值，App.vue 绑定到 EmUIKitProvider；运行期改动即时反映为 Provider props。
  */
@@ -139,8 +140,13 @@ export const DEMO_PROVIDER_CONFIG = {
   enableGroup: true,
   /** 是否启用用户资料（昵称/头像）展示与拉取 */
   enableUserInfo: true,
-  /** 是否启用陌生人用户资料变更订阅（服务端未开通时自动熔断） */
-  enableUserInfoSubscription: true,
+  /**
+   * 是否启用陌生人用户资料变更订阅。
+   * 当前 AppKey 集群未开通该服务：开启后登录会自动订阅并收到权限错误，
+   * UIKit 会弹出「用户资料实时订阅未开通…」的 warning toast（2 秒一闪而过）。
+   * 服务端未开通时该订阅本就不生效，故默认关闭；后续集群开通后改回 true 即可恢复实时更新。
+   */
+  enableUserInfoSubscription: false,
   /** 好友列表是否过滤掉已拉黑用户（仅联系人子视图/好友列表生效，选人弹窗不受影响） */
   filterBlockedContacts: true,
   /** 是否启用内置 Toast 提示（关闭后可用 useToast() 自行渲染） */

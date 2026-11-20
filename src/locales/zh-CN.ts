@@ -465,7 +465,7 @@ export default {
       notes: {
         afterEnable: '开启后：',
         defaultAllOn:
-          'Provider 能力开关默认全部开启（单聊昵称默认关闭、自定义数据源默认关闭）。关闭后对应功能不再拉取 / 渲染 / 发送。',
+          'Provider 能力开关默认全部开启（单聊昵称、自定义数据源、用户资料实时订阅默认关闭）。关闭后对应功能不再拉取 / 渲染 / 发送。',
         readOnMount:
           '注意：开关在 Provider 挂载时读取，登录后修改需重新登录（或刷新页面）才能完整生效。',
         customDataSource: '启用自定义数据源后，拉取好友将走示例接口（返回 Alice / Bob）而非 SDK。',

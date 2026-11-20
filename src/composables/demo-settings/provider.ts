@@ -17,7 +17,7 @@ import { DEMO_PROVIDER_CONFIG } from '@/config/demo'
 
 function createProviderSettings() {
   /* ===== Provider 能力开关（EmUIKitProvider，见「UIKit 特性开关 - Provider」面板） =====
-   * 默认对齐 DEMO_PROVIDER_CONFIG（除昵称展示/自定义数据源外默认全部开启），关闭后对应功能不再拉取 / 渲染 / 发送。
+   * 默认对齐 DEMO_PROVIDER_CONFIG（除昵称展示/自定义数据源/用户资料实时订阅外默认全部开启），关闭后对应功能不再拉取 / 渲染 / 发送。
    * 注意：开关在 Provider 挂载时读取，登录后修改需重新登录（或刷新页面）才能完整生效。
    */
   /** 好友列表与好友事件（标签 enableContact） */
