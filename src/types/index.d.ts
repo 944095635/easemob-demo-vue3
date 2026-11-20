@@ -3,7 +3,10 @@
 /** 后端统一响应体结构，按实际接口约定调整 */
 export interface ApiResult<T = unknown> {
   code: number
-  message: string
+  /** 标准错误字段 */
+  message?: string
+  /** 部分自有服务接口使用 msg（Flutter ApiResponse.fromJson 兼容两者） */
+  msg?: string
   data: T
 }
 

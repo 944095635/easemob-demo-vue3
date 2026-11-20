@@ -32,8 +32,8 @@ describe('useDemoSettings（会话UIKIT特性开关）', () => {
     expect(settings.contactShowContactEntry.value).toBe(true)
     expect(settings.contactShowGroupEntry.value).toBe(true)
     expect(settings.contactShowBlocklist.value).toBe(true)
-    expect(settings.contactShowHomeAddButton.value).toBe(false)
-    expect(settings.contactShowContactAddButton.value).toBe(false)
+    expect(settings.contactShowHomeAddButton.value).toBe(true)
+    expect(settings.contactShowContactAddButton.value).toBe(true)
     expect(settings.contactShowGroupCreateButton.value).toBe(true)
     expect(settings.contactShowBlocklistAddButton.value).toBe(true)
     expect(settings.aiMockReplyEnabled.value).toBe(false)
@@ -179,8 +179,8 @@ describe('useDemoSettings（会话UIKIT特性开关）', () => {
     settings.contactShowContactEntry.value = false
     settings.contactShowGroupEntry.value = false
     settings.contactShowBlocklist.value = false
-    settings.contactShowHomeAddButton.value = true
-    settings.contactShowContactAddButton.value = true
+    settings.contactShowHomeAddButton.value = false
+    settings.contactShowContactAddButton.value = false
     settings.contactShowGroupCreateButton.value = false
     settings.contactShowBlocklistAddButton.value = false
 
@@ -193,8 +193,8 @@ describe('useDemoSettings（会话UIKIT特性开关）', () => {
     expect(settings.contactShowContactEntry.value).toBe(true)
     expect(settings.contactShowGroupEntry.value).toBe(true)
     expect(settings.contactShowBlocklist.value).toBe(true)
-    expect(settings.contactShowHomeAddButton.value).toBe(false)
-    expect(settings.contactShowContactAddButton.value).toBe(false)
+    expect(settings.contactShowHomeAddButton.value).toBe(true)
+    expect(settings.contactShowContactAddButton.value).toBe(true)
     expect(settings.contactShowGroupCreateButton.value).toBe(true)
     expect(settings.contactShowBlocklistAddButton.value).toBe(true)
   })

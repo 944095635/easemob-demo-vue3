@@ -33,15 +33,15 @@ function createContactSettings() {
   /* ===== 通讯录头部按钮显隐配置 ===== */
   /**
    * 是否在通讯录首页（home）头部展示添加好友按钮。
-   * 默认关闭：与会话列表右上角菜单隐藏「添加联系人」保持一致（Demo 统一不暴露加好友入口），
-   * 走 EmContactContainer 的 show-home-add-button prop（默认 true，必须显式传 false 才隐藏）。
+   * 默认开启：对齐 App 会话页「+ → 添加好友」入口，点击后进入完整搜索/申请流程，
+   * 走 EmContactContainer 的 show-home-add-button prop；设置面板可手动关闭。
    */
-  const contactShowHomeAddButton = ref(false)
+  const contactShowHomeAddButton = ref(true)
   /**
    * 是否在联系人子视图头部展示添加好友按钮。
-   * 默认关闭：同上，走 EmContactContainer 的 show-contact-add-button prop；设置面板开关仍可手动打开恢复。
+   * 默认开启：同上，走 EmContactContainer 的 show-contact-add-button prop。
    */
-  const contactShowContactAddButton = ref(false)
+  const contactShowContactAddButton = ref(true)
   /** 是否在群组子视图头部展示创建群组按钮 */
   const contactShowGroupCreateButton = ref(true)
   /** 是否在黑名单子视图头部展示添加黑名单按钮 */
@@ -56,8 +56,8 @@ function createContactSettings() {
     contactShowContactEntry.value = true
     contactShowGroupEntry.value = true
     contactShowBlocklist.value = true
-    contactShowHomeAddButton.value = false
-    contactShowContactAddButton.value = false
+    contactShowHomeAddButton.value = true
+    contactShowContactAddButton.value = true
     contactShowGroupCreateButton.value = true
     contactShowBlocklistAddButton.value = true
   }

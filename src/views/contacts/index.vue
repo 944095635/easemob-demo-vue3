@@ -16,7 +16,6 @@ import {
 } from '@easemob-community/uikit-im'
 import type { UiContact, UiContactInvite, UiGroup } from '@easemob-community/uikit-im'
 
-import AddContactModal from '@/components/contact/AddContactModal.vue'
 import { useDemoCreateGroup } from '@/composables/useDemoCreateGroup'
 import { useDemoSettings } from '@/composables/useDemoSettings'
 import { useMobileView } from '@/composables/useMobileView'
@@ -26,6 +25,7 @@ import { DEMO_ICON_SIZE, DEMO_RESIZABLE_CONFIG, DEMO_SIDEBAR_CONFIG } from '@/co
 defineOptions({ name: 'ContactsPage' })
 
 const { t } = useI18n()
+const router = useRouter()
 const isMobileView = useMobileView()
 const { stores } = useUIKit()
 const {
@@ -57,16 +57,17 @@ const detailGroupId = ref<string | null>(null)
 const detailTitle = ref('')
 
 /**
- * EmContactContainer 右上角加号只负责抛出 add-contact / create-group 事件，
- * 自身不会弹出任何弹窗；这里由页面接管，弹出 uikit 内置的添加好友/创建群组弹窗。
+ * EmContactContainer 右上角加号只负责抛出 add-contact / create-group 事件。
+ * 添加好友改为对齐 App 的完整流程：跳搜索用户页 → 资料页 → 发送好友申请页。
  */
-const showAddContactModal = ref(false)
+function openUserSearch() {
+  router.push({ name: 'ContactSearch' })
+}
+
 const showCreateGroupModal = ref(false)
 
 /** 创建群组接管：群名改为「群组 + 创建日期时间」，便于区分造数 */
 const { demoCreateGroup } = useDemoCreateGroup()
-
-/* ===== 添加好友弹窗：UIKit 内置 EmAddContactModal（手机号 / 用户 ID 单输入框），由页面接管弹出 ===== */
 
 function onContactClick(contact: UiContact) {
   detailUserId.value = contact.userId
@@ -88,7 +89,6 @@ function onViewChange() {
 
 /* ===== 联系人/群组详情「发送消息」：内置卡片（EmContactDetail/EmGroupDetail）emit send-message，跳转与会话创建由页面接管 ===== */
 
-const router = useRouter()
 const { selectConversation } = useConversation()
 
 /**
@@ -198,7 +198,7 @@ function backToContactList() {
           @contact-click="onContactClick"
           @group-click="onGroupClick"
           @blocklist-item-click="onContactClick"
-          @add-contact="showAddContactModal = true"
+          @add-contact="openUserSearch"
           @create-group="showCreateGroupModal = true"
         >
           <!-- 通知列表接管：好友申请「通过」后直接跳入单聊（默认渲染无此联动） -->
@@ -245,7 +245,7 @@ function backToContactList() {
           @contact-click="onContactClick"
           @group-click="onGroupClick"
           @blocklist-item-click="onContactClick"
-          @add-contact="showAddContactModal = true"
+          @add-contact="openUserSearch"
           @create-group="showCreateGroupModal = true"
         >
           <!-- 通知列表接管：好友申请「通过」后直接跳入单聊（默认渲染无此联动） -->
@@ -280,8 +280,6 @@ function backToContactList() {
       </div>
     </template>
 
-    <!-- 加号弹窗：添加好友（手机号 / 用户 ID）/ 创建群组（PC 与 H5 共用一份） -->
-    <AddContactModal v-model:show="showAddContactModal" />
     <EmCreateGroupModal v-model:show="showCreateGroupModal" :create-fn="demoCreateGroup" />
   </div>
 </template>

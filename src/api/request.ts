@@ -51,10 +51,12 @@ request.interceptors.request.use(
 // 响应拦截器：统一拆包与错误处理
 request.interceptors.response.use(
   (response: AxiosResponse<ApiResult>) => {
-    const { code, message, data } = response.data
+    const { code, data } = response.data
+    // 自有服务部分接口用 msg 而不是 message（Flutter ApiResponse.fromJson 两种都兼容）
+    const message = response.data.message || response.data.msg || '请求失败'
     if (code !== 0) {
       // 统一错误提示：待接入全局 toast 组件（如 uikit 内置提示）后在此处弹出
-      return Promise.reject(new Error(message || '请求失败'))
+      return Promise.reject(new Error(message))
     }
     // 拦截器已拆包返回 data，这里对 axios 默认签名做断言
     return data as unknown as AxiosResponse

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onUnmounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
 import {
   CONVERSATION_TYPE,
   EmChatContainer,
@@ -29,7 +30,6 @@ import GroupInviteMessage from '@/components/chat/GroupInviteMessage.vue'
 import NoteMessage from '@/components/chat/NoteMessage.vue'
 import SystemNoticeMessage from '@/components/chat/SystemNoticeMessage.vue'
 import UnsupportedCustomTip from '@/components/chat/UnsupportedCustomTip.vue'
-import AddContactModal from '@/components/contact/AddContactModal.vue'
 import { useDemoCreateGroup } from '@/composables/useDemoCreateGroup'
 import { useDemoSettings } from '@/composables/useDemoSettings'
 import { useGroupAnnouncement } from '@/composables/useGroupAnnouncement'
@@ -56,6 +56,7 @@ import {
 defineOptions({ name: 'ChatPage' })
 
 const { t, locale } = useI18n()
+const router = useRouter()
 const isMobileView = useMobileView()
 const { isMobile } = useViewport()
 const { currentConversation, leaveConversation, refreshConversationPreviews } = useConversation()
@@ -89,9 +90,9 @@ watch(
 )
 
 /**
- * 会话列表右上角「+」菜单项：去掉内置「添加联系人」「创建群组」，仅保留新建会话。
- * 传空数组会隐藏整个 + 入口；这里显式列出保留项，走 UIKit 内置 key 打开对应弹窗。
- * 文案取 UIKit i18n，随语言切换响应式更新。
+ * 会话列表右上角「+」菜单项：新建会话 + 添加好友。
+ * 添加好友按 App 流程跳搜索用户页（搜索 → 资料 → 发送申请），不再使用单步 SDK 弹窗。
+ * 创建群组保持 UIKit 内置弹窗（见下方 #create-group 插槽）。
  */
 const conversationMenuItems = computed<ConversationHeaderMenuItem[]>(() => {
   // 依赖 uikitLocale，确保切换语言时重新取文案（tUI 本身非 ref）
@@ -101,6 +102,14 @@ const conversationMenuItems = computed<ConversationHeaderMenuItem[]>(() => {
       key: 'newChat',
       label: tUI('conversation.newChat'),
       icon: 'bubble/rect/empty',
+    },
+    {
+      key: 'addFriend',
+      label: t('contacts.search.title'),
+      icon: 'person/plus',
+      handler: () => {
+        void router.push({ name: 'ContactSearch' })
+      },
     },
   ]
 })
@@ -359,9 +368,6 @@ watch(
           @conversation-click="onConversationSelect"
           @update:active-tab="onConversationActiveTabChange"
         >
-          <template #add-contact="{ show, close }">
-            <AddContactModal :show="show" @update:show="close" />
-          </template>
           <!-- 创建群组接管：群名改为「群组 + 创建日期时间」，便于区分造数 -->
           <template #create-group="{ show, close }">
             <EmCreateGroupModal :show="show" :create-fn="demoCreateGroup" @update:show="close" />
@@ -443,9 +449,6 @@ watch(
           @conversation-click="onConversationSelect"
           @update:active-tab="onConversationActiveTabChange"
         >
-          <template #add-contact="{ show, close }">
-            <AddContactModal :show="show" @update:show="close" />
-          </template>
           <!-- 创建群组接管：群名改为「群组 + 创建日期时间」，便于区分造数 -->
           <template #create-group="{ show, close }">
             <EmCreateGroupModal :show="show" :create-fn="demoCreateGroup" @update:show="close" />

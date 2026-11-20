@@ -34,6 +34,24 @@ const routes: RouteRecordRaw[] = [
         meta: { title: 'nav.contacts' },
       },
       {
+        path: 'contacts/search',
+        name: 'ContactSearch',
+        component: () => import('@/views/contacts/UserSearch.vue'),
+        meta: { title: 'contacts.search.title' },
+      },
+      {
+        path: 'contacts/user/:userId',
+        name: 'ContactUserProfile',
+        component: () => import('@/views/contacts/UserProfile.vue'),
+        meta: { title: 'contacts.profile.title' },
+      },
+      {
+        path: 'contacts/apply/:userId',
+        name: 'FriendApply',
+        component: () => import('@/views/contacts/FriendApply.vue'),
+        meta: { title: 'contacts.apply.title' },
+      },
+      {
         path: 'settings',
         name: 'Settings',
         component: () => import('@/views/settings/index.vue'),
