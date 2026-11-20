@@ -20,6 +20,15 @@
   display: none !important;
 }
 
+// 群资料页「发消息」与「退出该群 / 解散该群」两个按钮间距收紧：
+// UIKit 默认 .group-detail__footer 的 margin-top 为 64px（部分主题覆盖为 32px），
+// 导致底部操作按钮与上方「发消息」相隔过远；统一收紧到 12px，
+// 与 footer 内部按钮组 gap 保持一致，两个按钮视觉上成一组。
+// UIKit 组件样式由异步 chunk 注入、加载顺序不稳定，故使用 !important。
+.group-detail__footer {
+  margin-top: 12px !important;
+}
+
 // 覆盖 nprogress 顶部进度条颜色
 #nprogress .bar {
   background: var(--color-primary);
