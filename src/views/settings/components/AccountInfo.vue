@@ -1,30 +1,17 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useUIKit } from '@easemob-community/uikit-im'
 
-import { usePresenceSubscription } from '@/composables/usePresenceSubscription'
 import { ensureUserProfile } from '@/composables/useUserProfile'
 import { useUserStore } from '@/store/modules/user'
 
-import AvatarSection from './account/AvatarSection.vue'
 import DangerZone from './account/DangerZone.vue'
 import ProfileDetails from './account/ProfileDetails.vue'
-import ProfileDisplay from './account/ProfileDisplay.vue'
-import ProfileEditor from './account/ProfileEditor.vue'
 
 defineOptions({ name: 'AccountInfo' })
 
 const { t } = useI18n()
 const userStore = useUserStore()
-const { client } = useUIKit()
-
-const userId = computed(
-  () => client.value?.currentUserId || userStore.userId || 'supercalifragilisticexpialidocious',
-)
-
-// 订阅自身在线状态；服务端未开通或异常时静默降级（composable 内部处理退订）
-const { presenceStatus } = usePresenceSubscription(userId)
 
 // 进入账户页时确保个人资料已加载（启动/登录已加载则不会重复请求）
 onMounted(() => {
@@ -40,18 +27,7 @@ onMounted(() => {
 
     <div class="account-info__body">
       <div class="account-info__content">
-        <ProfileDisplay :presence="presenceStatus" />
-
-        <!-- 三行包一层：ProfileEditor / AvatarSection 为多根节点组件，不包层会被 content 的
-             gap 63px 当作独立子元素撑开行间间距（设计稿行间仅 1px 分割线、无间距） -->
-        <div class="account-info__rows">
-          <ProfileEditor>
-            <template #avatar-row>
-              <AvatarSection />
-            </template>
-          </ProfileEditor>
-        </div>
-
+        <!-- 资料分组卡片（对齐 App「我的信息」页）：基础设置 + 资料卡 -->
         <ProfileDetails />
 
         <DangerZone />
@@ -103,21 +79,14 @@ onMounted(() => {
     padding: 32px 24px;
   }
 
-  /* 内容列：520px 宽水平居中、垂直居中（margin auto 保证超高时可滚动不裁切），区块间距对齐设计稿 63px */
+  /* 内容列：520px 宽水平居中、垂直居中（margin auto 保证超高时可滚动不裁切），区块间距对齐设计稿 */
   &__content {
     width: 100%;
     max-width: 520px;
     margin: auto;
     display: flex;
     flex-direction: column;
-    gap: 63px;
-  }
-
-  /* 资料行组（昵称 / 头像 / 签名）：直接堆叠、行间仅 1px 分割线，行高 54 / 64 / 54 */
-  &__rows {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
+    gap: 24px;
   }
 }
 </style>
