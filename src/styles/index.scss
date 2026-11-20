@@ -1,6 +1,16 @@
 @use './themes.scss';
 @use './reset.scss';
 
+// 隐藏 UIKit 组件中的「群 ID」展示：前端不对外展示群 ID。
+// - .group-detail__meta：群详情卡片的「群 ID: xxx」行；
+// - .group-card__group-id：群名片卡片中的群 ID。
+// 两者容器内容仅为群 ID，隐藏整行不影响其它信息。
+// UIKit 组件样式由异步 chunk 注入、加载顺序不稳定，故使用 !important。
+.group-detail__meta,
+.group-card__group-id {
+  display: none !important;
+}
+
 // 覆盖 nprogress 顶部进度条颜色
 #nprogress .bar {
   background: var(--color-primary);

@@ -79,7 +79,7 @@ function onContactClick(contact: UiContact) {
 function onGroupClick(group: UiGroup) {
   detailGroupId.value = group.groupId
   detailUserId.value = null
-  detailTitle.value = group.groupName || group.groupId
+  detailTitle.value = group.groupName || t('contacts.source.group')
 }
 
 function onViewChange() {
@@ -131,7 +131,12 @@ function onSendMessageToUser(userId: string) {
 
 function onSendMessageToGroup(groupId: string) {
   const group = stores.group.getGroupById(groupId)
-  gotoConversation(groupId, CONVERSATION_TYPE.GROUPCHAT, group?.groupName || groupId, group?.avatar)
+  gotoConversation(
+    groupId,
+    CONVERSATION_TYPE.GROUPCHAT,
+    group?.groupName || t('contacts.source.group'),
+    group?.avatar,
+  )
 }
 
 /** 删除联系人/退出/解散群组后，关闭右侧详情回到列表 */
