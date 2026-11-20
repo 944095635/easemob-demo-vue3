@@ -26,7 +26,6 @@ import CardMessage from '@/components/chat/CardMessage.vue'
 import EmojiMessage from '@/components/chat/EmojiMessage.vue'
 import NoteMessage from '@/components/chat/NoteMessage.vue'
 import UnsupportedCustomTip from '@/components/chat/UnsupportedCustomTip.vue'
-import EmptyStateNotice from '@/components/common/EmptyStateNotice.vue'
 import AddContactModal from '@/components/contact/AddContactModal.vue'
 import { useDemoCreateGroup } from '@/composables/useDemoCreateGroup'
 import { useDemoSettings } from '@/composables/useDemoSettings'
@@ -355,11 +354,6 @@ watch(
         <!-- card 档位（对齐 UIKit demo）：圆角卡片壳（细边框 + 圆角 + 底色）由容器自绘，
              宿主壳退化为纯定位容器，避免双层卡片 -->
         <EmChatContainer variant="card" :config="chatConfig">
-          <!-- 空状态文案注入（未选中会话时展示）：图标沿用 UIKit EmEmpty 的 bubble/rect/2，
-               文案替换为 Figma 新 Demo 空状态两行提示 -->
-          <template #empty>
-            <EmptyStateNotice />
-          </template>
           <template #message-text="{ message }">
             <MarkdownStreamMessage :message="message as UiMessage" />
           </template>

@@ -17,7 +17,6 @@ import {
 import type { UiContact, UiContactInvite, UiGroup } from '@easemob-community/uikit-im'
 
 import AddContactModal from '@/components/contact/AddContactModal.vue'
-import EmptyStateNotice from '@/components/common/EmptyStateNotice.vue'
 import { useDemoCreateGroup } from '@/composables/useDemoCreateGroup'
 import { useDemoSettings } from '@/composables/useDemoSettings'
 import { useMobileView } from '@/composables/useMobileView'
@@ -222,10 +221,8 @@ function backToContactList() {
           @leaved="onGroupClosed"
           @destroyed="onGroupClosed"
         />
-        <!-- 空状态占位（未选中联系人/群组）：对齐 Figma 新 Demo 空状态（person/double 图标 + 两行提示） -->
-        <div v-else class="contacts-page__empty">
-          <EmptyStateNotice icon="person/double" />
-        </div>
+        <!-- 未选中联系人/群组时保留居中占位，避免主区塌陷 -->
+        <div v-else class="contacts-page__empty" />
       </div>
     </template>
 
@@ -342,8 +339,7 @@ function backToContactList() {
     }
   }
 
-  /* 空状态占位：仅负责居中，图标 / 文案样式由 EmptyStateNotice 自带（对齐 Figma）；
-     padding-bottom 27px 让内容组垂直中心上移 13.5px（设计稿 top: 50% - 13.5px） */
+  /* 未选中联系人/群组时的居中占位（保持主区布局稳定，不渲染任何提示） */
   &__empty {
     flex: 1;
     display: flex;
