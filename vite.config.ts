@@ -90,7 +90,9 @@ export default defineConfig(({ mode }) => {
   const apiProxy = {
     target: env.VITE_PROXY_TARGET || 'http://localhost:8080',
     changeOrigin: true,
-    rewrite: (path: string) => path.replace(/^\/api/, ''),
+    // 自有服务端接口路径本身带 /api（对齐 Flutter NetClient._addApiPrefix），
+    // 前端 /api/group/xxx 需原样转发，不能再去掉 /api 前缀。
+    rewrite: (path: string) => path,
   }
   // 头像/图片 OSS 分发代理：src/utils/ossAccess.ts 把 OSS/CDN 绝对 URL 改写为
   // /oss-cdn/<path>，这里去掉前缀转发到 CDN，并注入防盗链要求的 Referer 头。

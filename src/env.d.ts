@@ -10,6 +10,8 @@ interface ImportMetaEnv {
   readonly VITE_API_TIMEOUT?: string
   /** 自有 App Server 地址（登录、用户、头像等接口） */
   readonly VITE_APP_SERVER_URL?: string
+  /** 自有服务端请求签名密钥（对齐 Flutter Configs.httpKey，用于 X-Sign） */
+  readonly VITE_HTTP_SIGN_KEY?: string
   /** 阿里云验证码 2.0（仅生产环境，配置在 .env.production.local，不入库） */
   readonly VITE_CAPTCHA_SCENE_ID?: string
   readonly VITE_CAPTCHA_PREFIX?: string

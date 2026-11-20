@@ -2,6 +2,7 @@
 import { computed, onUnmounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import {
+  CONVERSATION_TYPE,
   EmChatContainer,
   EmConversationContainer,
   EmCreateGroupModal,
@@ -29,6 +30,7 @@ import UnsupportedCustomTip from '@/components/chat/UnsupportedCustomTip.vue'
 import AddContactModal from '@/components/contact/AddContactModal.vue'
 import { useDemoCreateGroup } from '@/composables/useDemoCreateGroup'
 import { useDemoSettings } from '@/composables/useDemoSettings'
+import { useGroupAnnouncement } from '@/composables/useGroupAnnouncement'
 import { useMobileTabbar } from '@/composables/useMobileTabbar'
 import { useMobileView } from '@/composables/useMobileView'
 import { useSidebarWidth } from '@/composables/useSidebarWidth'
@@ -57,6 +59,30 @@ const { demoCreateGroup } = useDemoCreateGroup()
 const { t: tUI, locale: uikitLocale } = useLocale()
 
 const hasCurrentConversation = computed(() => !!currentConversation.value)
+
+/* ===== 群公告：点击群会话时拉取自有服务端群资料，写入 UIKit group store ===== */
+const { load: loadGroupAnnouncement } = useGroupAnnouncement()
+
+interface ConversationLike {
+  id: string
+  type?: string | number
+}
+
+function onConversationSelect(conversation: ConversationLike) {
+  if (conversation?.type === CONVERSATION_TYPE.GROUPCHAT && conversation.id) {
+    void loadGroupAnnouncement(conversation.id)
+  }
+}
+
+// 点击会话列表 / 程序化切换都会改变 currentConversation，这里兜底覆盖；
+// 同一群重复点击由 api 层缓存与 pending 去重，不会重复请求。
+watch(
+  () => ({ id: currentConversation.value?.id, type: currentConversation.value?.type }),
+  ({ id, type }) => {
+    if (id && type === CONVERSATION_TYPE.GROUPCHAT) void loadGroupAnnouncement(id)
+  },
+  { immediate: true },
+)
 
 /**
  * 会话列表右上角「+」菜单项：去掉内置「添加联系人」「创建群组」，仅保留新建会话。
@@ -325,6 +351,8 @@ watch(
           :unread-mode="conversationUnreadMode"
           :unread-placement="conversationUnreadPlacement"
           :badge-placement="conversationBadgePlacement"
+          @conversation-select="onConversationSelect"
+          @conversation-click="onConversationSelect"
           @update:active-tab="onConversationActiveTabChange"
         >
           <template #add-contact="{ show, close }">
@@ -398,6 +426,8 @@ watch(
           :unread-mode="conversationUnreadMode"
           :unread-placement="conversationUnreadPlacement"
           :badge-placement="conversationBadgePlacement"
+          @conversation-select="onConversationSelect"
+          @conversation-click="onConversationSelect"
           @update:active-tab="onConversationActiveTabChange"
         >
           <template #add-contact="{ show, close }">
