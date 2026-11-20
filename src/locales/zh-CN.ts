@@ -677,6 +677,10 @@ export default {
     loading: '加载中…',
     noMore: '没有更多了',
     loadFailed: '收藏加载失败',
+    collectAction: '收藏',
+    collectSuccess: '收藏成功',
+    collectEmojiSuccess: '表情收藏成功',
+    collectFailed: '收藏失败',
     delete: '删除',
     deleteTitle: '删除收藏',
     deleteConfirm: '是否删除当前收藏？',
@@ -704,6 +708,7 @@ export default {
       file: '文件',
       location: '位置',
       note: '笔记',
+      chat: '聊天记录',
     },
   },
   notFound: {

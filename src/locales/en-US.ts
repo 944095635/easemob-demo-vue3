@@ -703,6 +703,10 @@ export default {
     loading: 'Loading…',
     noMore: 'No more',
     loadFailed: 'Failed to load favorites',
+    collectAction: 'Favorite',
+    collectSuccess: 'Added to favorites',
+    collectEmojiSuccess: 'Emoji added to favorites',
+    collectFailed: 'Failed to add favorite',
     delete: 'Delete',
     deleteTitle: 'Delete favorite',
     deleteConfirm: 'Delete this favorite?',
@@ -730,6 +734,7 @@ export default {
       file: 'File',
       location: 'Location',
       note: 'Note',
+      chat: 'Chat',
     },
   },
   notFound: {

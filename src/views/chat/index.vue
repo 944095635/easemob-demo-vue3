@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onUnmounted, watch } from 'vue'
+import { computed, onUnmounted, watch, type ComponentPublicInstance } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import {
@@ -13,6 +13,7 @@ import {
   useConversation,
   useConversationTabs,
   useLocale,
+  useToast,
   useUIKit,
   useViewport,
 } from '@easemob-community/uikit-im'
@@ -45,6 +46,8 @@ import { isGroupInviteMessage } from '@/utils/groupInviteMessage'
 import { isNoteMessage } from '@/utils/noteMessage'
 import { isSystemNoticeMessage } from '@/utils/systemNoticeMessage'
 import { isUnsupportedCustomMessage } from '@/utils/customMessage'
+import { addCustomEmoji, createCollection } from '@/api/collection'
+import { buildCollectionFromMessage, canCollectMessage } from '@/utils/favoriteMessage'
 import { trackEvent } from '@/utils/analytics'
 import {
   DEMO_CHAT_CONFIG,
@@ -63,6 +66,7 @@ const { isMobile } = useViewport()
 const { currentConversation, leaveConversation, refreshConversationPreviews } = useConversation()
 const { demoCreateGroup } = useDemoCreateGroup()
 const { t: tUI, locale: uikitLocale } = useLocale()
+const { success: showSuccess, error: showError } = useToast()
 
 const hasCurrentConversation = computed(() => !!currentConversation.value)
 
@@ -71,6 +75,69 @@ const { load: loadGroupAnnouncement } = useGroupAnnouncement()
 
 /* ===== 群人数后缀可见性：按 App 规则由「是否隐藏群成员」+「当前账号 VIP / 群角色」动态决定 ===== */
 const { showMemberCount, showGroupMemberList } = useGroupMemberCountVisibility()
+
+/* ===== 消息收藏：右键/长按菜单「收藏」，对齐 App onTapCollection =====
+ * Web 端不上传文件到 OSS：图片/视频/文件直接收藏消息体里的原始地址（见 favoriteMessage.ts）。
+ */
+/**
+ * 右键菜单里「收藏」的位置：UIKit 把 extra 插槽内容固定渲染在整个菜单最后，
+ * 而 App 里收藏排在「置顶」之前。菜单是 flex column，内置项的 class 为
+ * .message-action-menu__item 且无稳定 type 标识，故按「置顶/取消置顶」文案定位，
+ * 用 flex order 把置顶及其后的项后置，让收藏自然落在置顶前。
+ * 只改 style.order、不动 DOM 结构，避免与 Vue patch 冲突；函数幂等可重复调用。
+ * H5 action sheet 结构不同（父容器非 .message-action-menu），保持末尾不变。
+ */
+function placeCollectItem(ref: Element | ComponentPublicInstance | null): void {
+  const el = ref instanceof Element ? ref : null
+  if (!el) return
+  const host = el.parentElement
+  if (!host?.classList.contains('message-action-menu')) return
+  const items = Array.from(host.children).filter((node) =>
+    node.classList.contains('message-action-menu__item'),
+  ) as HTMLElement[]
+  if (!items.length) return
+
+  // 菜单 label 与 tUI 同源（同一 i18n key）；把 key 本身也纳入候选，兼容缺翻译时返回 key 的情况
+  const pinLabels = [
+    tUI('message.action.pin'),
+    tUI('message.action.unpin'),
+    'message.action.pin',
+    'message.action.unpin',
+    '置顶',
+    '取消置顶',
+    'Pin',
+    'Unpin',
+  ].filter(Boolean) as string[]
+  const pinIndex = items.findIndex((item) => {
+    const label = (item.textContent || '').trim()
+    return pinLabels.some((candidate) => label === candidate || label.includes(candidate))
+  })
+  if (pinIndex < 0) return
+
+  items.slice(pinIndex).forEach((item) => {
+    item.style.order = '1'
+  })
+  ;(el as HTMLElement).style.order = '0'
+}
+
+async function onCollectMessage(message: UiMessage): Promise<void> {
+  if (!canCollectMessage(message)) return
+  try {
+    const result = buildCollectionFromMessage(message)
+    if (!result) return
+    if (result.kind === 'emoji') {
+      if (!result.emojiUrl) throw new Error(t('favorite.collectFailed'))
+      await addCustomEmoji(result.emojiUrl)
+      showSuccess(t('favorite.collectEmojiSuccess'))
+      return
+    }
+    if (!result.payload) throw new Error(t('favorite.collectFailed'))
+    await createCollection(result.payload)
+    showSuccess(t('favorite.collectSuccess'))
+  } catch (err) {
+    showError(err instanceof Error ? err.message : t('favorite.collectFailed'))
+  }
+}
 
 interface ConversationLike {
   id: string
@@ -414,6 +481,13 @@ watch(
           <template #message-text="{ message }">
             <MarkdownStreamMessage :message="message as UiMessage" />
           </template>
+          <!-- 右键/长按菜单追加「收藏」（对齐 App message_item.dart 的收藏项） -->
+          <template #message-action-extra="{ message }">
+            <div :ref="placeCollectItem" class="chat-collect-action" @click="onCollectMessage(message as UiMessage)">
+              <EmIcon name="status/star" :size="16" />
+              <span>{{ t('favorite.collectAction') }}</span>
+            </div>
+          </template>
           <!-- 自定义消息：bidirectional 走系统样式；emoji 渲染为裸图；note 渲染为笔记卡片；
                card/userCard 渲染为名片卡片；groupInviteV1 渲染为邀请卡片；notice 渲染为
                居中灰色系统文案（进群/退群提示）；其余不支持的显示提示 -->
@@ -499,6 +573,13 @@ watch(
           <EmChatContainer :config="chatConfig">
             <template #message-text="{ message }">
               <MarkdownStreamMessage :message="message as UiMessage" />
+            </template>
+            <!-- 右键/长按菜单追加「收藏」（对齐 App message_item.dart 的收藏项） -->
+            <template #message-action-extra="{ message }">
+              <div :ref="placeCollectItem" class="chat-collect-action" @click="onCollectMessage(message as UiMessage)">
+                <EmIcon name="status/star" :size="16" />
+                <span>{{ t('favorite.collectAction') }}</span>
+              </div>
             </template>
             <template #message-custom="{ message }">
               <BidirectionalMessage
@@ -703,6 +784,26 @@ watch(
   .message-renderer__slot {
     width: auto;
     align-items: center;
+  }
+}
+
+/* 右键/长按菜单里追加的「收藏」项：#message-action-extra 插槽内容直接渲染在
+   .message-action-menu 容器内（不在 __item 里），故需复刻 .message-action-menu__item 的样式。
+   菜单可能 teleport 渲染，样式放在非 scoped 区。 */
+.message-action-menu .chat-collect-action {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  font-size: var(--uikit-font-size-13);
+  color: var(--uikit-text-primary);
+  cursor: pointer;
+  border-radius: var(--uikit-item-hover-radius, 8px);
+  white-space: nowrap;
+  transition: background-color var(--uikit-anim-duration, 0.15s) var(--uikit-anim-easing, ease);
+
+  &:hover {
+    background-color: var(--uikit-bg-hover, #f5f5f5);
   }
 }
 </style>
