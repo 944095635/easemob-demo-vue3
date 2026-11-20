@@ -1,13 +1,15 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useUIKit } from '@easemob-community/uikit-im'
 
 import { usePresenceSubscription } from '@/composables/usePresenceSubscription'
+import { ensureUserProfile } from '@/composables/useUserProfile'
 import { useUserStore } from '@/store/modules/user'
 
 import AvatarSection from './account/AvatarSection.vue'
 import DangerZone from './account/DangerZone.vue'
+import ProfileDetails from './account/ProfileDetails.vue'
 import ProfileDisplay from './account/ProfileDisplay.vue'
 import ProfileEditor from './account/ProfileEditor.vue'
 
@@ -23,6 +25,11 @@ const userId = computed(
 
 // 订阅自身在线状态；服务端未开通或异常时静默降级（composable 内部处理退订）
 const { presenceStatus } = usePresenceSubscription(userId)
+
+// 进入账户页时确保个人资料已加载（启动/登录已加载则不会重复请求）
+onMounted(() => {
+  void ensureUserProfile(userStore.userId)
+})
 </script>
 
 <template>
@@ -44,6 +51,8 @@ const { presenceStatus } = usePresenceSubscription(userId)
             </template>
           </ProfileEditor>
         </div>
+
+        <ProfileDetails />
 
         <DangerZone />
       </div>

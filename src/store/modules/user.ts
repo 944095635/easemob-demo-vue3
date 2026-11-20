@@ -4,7 +4,13 @@ import { defineStore } from 'pinia'
 const WEB_IM_AUTH_KEY = 'webImAuth'
 
 interface UserState {
+  /** IM SDK 登录 token（dev 模式用户输入 / 短信登录返回的 chat token） */
   token: string
+  /**
+   * 自有服务 Web API token（用于 /api/user/profile、/api/group 等自有接口鉴权）。
+   * 与 IM token 不同：App 登录会返回两个 token，Web 端由用户在登录页单独输入。
+   */
+  webApiToken: string
   userId: string
   nickname: string
   /** 登录手机号，注销账户时使用 */
@@ -36,6 +42,7 @@ export const useUserStore = defineStore('user', {
     const persisted = readAuthFromStorage()
     return {
       token: persisted.token ?? '',
+      webApiToken: persisted.webApiToken ?? '',
       userId: persisted.userId ?? '',
       nickname: persisted.nickname ?? '',
       phoneNumber: persisted.phoneNumber ?? '',
@@ -47,6 +54,9 @@ export const useUserStore = defineStore('user', {
   actions: {
     setToken(token: string) {
       this.token = token
+    },
+    setWebApiToken(token: string) {
+      this.webApiToken = token
     },
     setUserId(userId: string) {
       this.userId = userId
@@ -71,6 +81,7 @@ export const useUserStore = defineStore('user', {
       if (typeof window === 'undefined') return
       const payload: Partial<UserState> = {
         token: this.token,
+        webApiToken: this.webApiToken,
         userId: this.userId,
         nickname: this.nickname,
         phoneNumber: this.phoneNumber,
@@ -84,6 +95,7 @@ export const useUserStore = defineStore('user', {
     restoreFromStorage() {
       const persisted = readAuthFromStorage()
       this.token = persisted.token ?? ''
+      this.webApiToken = persisted.webApiToken ?? ''
       this.userId = persisted.userId ?? ''
       this.nickname = persisted.nickname ?? ''
       this.phoneNumber = persisted.phoneNumber ?? ''

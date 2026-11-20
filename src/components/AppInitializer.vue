@@ -8,6 +8,7 @@ import { useUserStore } from '@/store/modules/user'
 import { initUIKit } from '@/utils/uikit'
 import { useMessagePushExt } from '@/composables/useMessagePushExt'
 import { useNewMessageNotice } from '@/composables/useNewMessageNotice'
+import { loadUserProfile, restoreCachedUserProfile } from '@/composables/useUserProfile'
 
 interface Props {
   /** 环信 AppKey，由外层 App.vue 传入 */
@@ -41,6 +42,10 @@ async function autoLoginToSDK() {
   try {
     await initUIKit(initClient, props.appKey)
     await login({ user: userStore.userId, accessToken: userStore.token })
+
+    // 每次打开 web 程序拉取一次个人资料：先用本地缓存回填首屏，再请求最新资料覆盖
+    restoreCachedUserProfile(userStore.userId)
+    void loadUserProfile(userStore.userId)
   } catch (err) {
     // 凭证已失效（如 token 过期）：直接清除登录态回登录页，避免卡在无法恢复的错误态
     console.error('[AppInitializer] 自动登录 IM SDK 失败，返回登录页', err)

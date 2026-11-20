@@ -48,6 +48,18 @@ describe('request 封装', () => {
     await http.get('/auth')
   })
 
+  it('webApiToken 优先于 IM token 注入 Authorization 头', async () => {
+    const store = useUserStore()
+    store.setToken('im-token')
+    store.setWebApiToken('web-api-token')
+    mock.onGet('/auth').reply((config) => {
+      expect(config.headers?.Authorization).toBe('Bearer web-api-token')
+      return [200, { code: 0, message: 'ok', data: null }]
+    })
+
+    await http.get('/auth')
+  })
+
   it('401 时清除登录态并跳转登录页', async () => {
     useUserStore().setToken('expired-token')
     mock.onGet('/expired').reply(401, { code: 401, message: '未授权', data: null })

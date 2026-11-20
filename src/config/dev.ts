@@ -11,6 +11,8 @@ export interface DevConfig {
   /** 开发者模式登录凭据 */
   devUserId: string
   devToken: string
+  /** 自有服务 Web API token（登录页输入，用于个人资料等自有接口） */
+  devWebApiToken: string
 }
 
 function safeParse<T>(raw: string | null, fallback: T): T {
@@ -30,6 +32,7 @@ function normalizeConfig(parsed: Partial<DevConfig>): DevConfig {
     usePrivateServer: parsed.usePrivateServer ?? false,
     devUserId: parsed.devUserId ?? '',
     devToken: parsed.devToken ?? '',
+    devWebApiToken: parsed.devWebApiToken ?? '',
   }
 }
 

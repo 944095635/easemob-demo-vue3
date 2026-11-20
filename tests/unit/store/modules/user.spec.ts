@@ -12,6 +12,7 @@ describe('user store', () => {
   it('初始状态为空', () => {
     const store = useUserStore()
     expect(store.token).toBe('')
+    expect(store.webApiToken).toBe('')
     expect(store.userId).toBe('')
     expect(store.nickname).toBe('')
     expect(store.phoneNumber).toBe('')
@@ -28,6 +29,12 @@ describe('user store', () => {
     expect(store.token).toBe('abc')
   })
 
+  it('setWebApiToken 写入 webApiToken', () => {
+    const store = useUserStore()
+    store.setWebApiToken('web-api-abc')
+    expect(store.webApiToken).toBe('web-api-abc')
+  })
+
   it('可写入手机号与各类 token', () => {
     const store = useUserStore()
     store.setPhoneNumber('13800000000')
@@ -41,6 +48,7 @@ describe('user store', () => {
   it('persistToStorage / restoreFromStorage 与 sessionStorage 同步', () => {
     const store = useUserStore()
     store.setToken('tk')
+    store.setWebApiToken('web-tk')
     store.setUserId('uid')
     store.setPhoneNumber('13800000000')
     store.setChatToken('ct')
@@ -53,6 +61,7 @@ describe('user store', () => {
     const another = useUserStore()
     another.restoreFromStorage()
     expect(another.token).toBe('tk')
+    expect(another.webApiToken).toBe('web-tk')
     expect(another.userId).toBe('uid')
     expect(another.phoneNumber).toBe('13800000000')
     expect(another.chatToken).toBe('ct')

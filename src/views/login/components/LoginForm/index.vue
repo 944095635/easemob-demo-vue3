@@ -10,6 +10,7 @@ import { useSmsCode } from '@/composables/useSmsCode'
 import { captchaConfig } from '@/config/captcha'
 import { initAliyunCaptcha, resetAliyunCaptcha } from '@/api/sms'
 import { loginByPhoneApi, mapPhoneLoginError } from '@/api/user'
+import { loadUserProfile } from '@/composables/useUserProfile'
 import { trackEvent } from '@/utils/analytics'
 import { initUIKit } from '@/utils/uikit'
 // import LoginCaptcha from '../LoginCaptcha/index.vue'
@@ -43,9 +44,12 @@ const focused = ref<string | null>(null)
 const loginLoading = ref(false)
 const loginError = ref('')
 
-/** 开发者模式：userId + token */
+/** 开发者模式：userId + token（IM token） */
 const devUserId = ref('')
 const devToken = ref('')
+
+/** 自有服务 Web API token（用于个人资料、群资料等自有接口，与 IM token 分开输入） */
+const webApiToken = ref('')
 
 // const captchaRef = ref<InstanceType<typeof LoginCaptcha> | null>(null)
 
@@ -64,6 +68,8 @@ onMounted(() => {
   const config = getDevConfig()
   devUserId.value = config.devUserId
   devToken.value = config.devToken
+  // Web API token 优先从 devConfig 回填（dev 模式），否则从已恢复的 store 读取
+  webApiToken.value = config.devWebApiToken || userStore.webApiToken
 
   // userId + token 登录模式下不初始化滑块验证；仅手机号 + 验证码流程需要
   if (!props.devMode) {
@@ -165,11 +171,19 @@ async function handleLogin() {
       // dev 模式下没有独立 chatToken/accessToken 之分，复用传入 token
       userStore.setChatToken(trimmedToken)
       userStore.setAccessToken(trimmedToken)
+      userStore.setWebApiToken(webApiToken.value.trim())
       userStore.setLoginMode('dev')
       userStore.persistToStorage()
       // 每次登录重置特性诱导展示（红点 + 广告弹层）
       useFeaturePromo().resetOnLogin()
-      setDevConfig({ ...getDevConfig(), devUserId: trimmedUserId, devToken: trimmedToken })
+      setDevConfig({
+        ...getDevConfig(),
+        devUserId: trimmedUserId,
+        devToken: trimmedToken,
+        devWebApiToken: webApiToken.value.trim(),
+      })
+      // 登录成功后拉取一次个人资料并缓存到本地
+      void loadUserProfile(userStore.userId)
       trackEvent('login', 'success', modeLabel)
       await router.push('/chat')
     } catch (err) {
@@ -204,12 +218,16 @@ async function handleLogin() {
     userStore.setUserId(userId)
     userStore.setChatToken(token)
     userStore.setAccessToken(token)
+    userStore.setWebApiToken(webApiToken.value.trim())
     userStore.setPhoneNumber(phone.value)
     userStore.setLoginMode('phone')
     userStore.persistToStorage()
 
     // 每次登录重置特性诱导展示（红点 + 广告弹层）
     useFeaturePromo().resetOnLogin()
+
+    // 登录成功后拉取一次个人资料并缓存到本地
+    void loadUserProfile(userStore.userId)
 
     trackEvent('login', 'success', modeLabel)
     await router.push('/chat')
@@ -251,6 +269,20 @@ async function handleLogin() {
           :placeholder="$t('login.devTokenPlaceholder')"
           required
           @focus="focused = 'devToken'"
+          @blur="focused = null"
+        />
+      </div>
+
+      <div
+        class="login-page__input"
+        :class="{ 'login-page__input--focused': focused === 'webApiToken' }"
+      >
+        <input
+          v-model="webApiToken"
+          type="text"
+          :placeholder="$t('login.webApiTokenPlaceholder')"
+          autocomplete="off"
+          @focus="focused = 'webApiToken'"
           @blur="focused = null"
         />
       </div>
@@ -297,6 +329,20 @@ async function handleLogin() {
         >
           {{ smsBtnText }}
         </button>
+      </div>
+
+      <div
+        class="login-page__input"
+        :class="{ 'login-page__input--focused': focused === 'webApiToken' }"
+      >
+        <input
+          v-model="webApiToken"
+          type="text"
+          :placeholder="$t('login.webApiTokenPlaceholder')"
+          autocomplete="off"
+          @focus="focused = 'webApiToken'"
+          @blur="focused = null"
+        />
       </div>
 
       <!-- 阿里云验证码弹出容器（popup 模式需要常驻 DOM，失败/关闭时隐藏即可） -->

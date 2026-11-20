@@ -33,10 +33,13 @@ async function redirectToLogin() {
   }
 }
 
-// 请求拦截器：注入 token
+// 请求拦截器：注入自有服务 Web API token
 request.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const token = useUserStore().token
+    const userStore = useUserStore()
+    // 自有服务接口（/api/user/profile、/api/group 等）需要 Web API token；
+    // 未输入时回退到 token（IM token），保持旧行为，避免破坏未配置 webapi token 的登录流程。
+    const token = userStore.webApiToken || userStore.token
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
