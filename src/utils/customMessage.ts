@@ -25,6 +25,9 @@ import type { UiMessage } from '@easemob-community/uikit-im'
  * - groupInviteV1：群邀请消息，由 GroupInviteMessage 组件渲染（见 chat/index.vue
  *   #message-custom 插槽）。params 里的 groupName/groupAvatar 渲染为群邀请卡片，点击
  *   打开群邀请详情弹窗，不能显示 event/params 原文。
+ * - notice：系统通知消息，由 SystemNoticeMessage 组件渲染（见 chat/index.vue
+ *   #message-custom 插槽）。params.text 渲染为居中灰色文案（进群/退群/被移出群等提示），
+ *   operator/members 中的昵称可点击打开用户名片，不能显示 event/params 原文。
  * 其余 custom 消息走「请用手机 App 查看」提示。
  */
 const SUPPORTED_CUSTOM_EVENTS = new Set<string>([
@@ -34,6 +37,7 @@ const SUPPORTED_CUSTOM_EVENTS = new Set<string>([
   'card',
   'userCard',
   'groupInviteV1',
+  'notice',
 ])
 
 /** 取自定义消息的 event 标识；非 custom 或无 event 时返回空串 */

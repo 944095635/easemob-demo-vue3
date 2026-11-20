@@ -9,6 +9,7 @@ import { EMOJI_EVENT } from '@/utils/customEmojiMessage'
 import { NOTE_EVENT } from '@/utils/noteMessage'
 import { CARD_EVENT, USER_CARD_EVENT } from '@/utils/cardMessage'
 import { GROUP_INVITE_EVENT } from '@/utils/groupInviteMessage'
+import { NOTICE_EVENT } from '@/utils/systemNoticeMessage'
 
 function msg(type: string, body: Record<string, unknown> = {}): UiMessage {
   return { type, body } as unknown as UiMessage
@@ -59,6 +60,10 @@ describe('isUnsupportedCustomMessage', () => {
     expect(
       isUnsupportedCustomMessage(msg(MESSAGE_TYPE.CUSTOM, { event: GROUP_INVITE_EVENT })),
     ).toBe(false)
+  })
+
+  it('notice 已支持系统文案渲染，不算不支持', () => {
+    expect(isUnsupportedCustomMessage(msg(MESSAGE_TYPE.CUSTOM, { event: NOTICE_EVENT }))).toBe(false)
   })
 
   it('非 custom 类型一律不是「不支持的自定义消息」', () => {

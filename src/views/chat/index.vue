@@ -27,6 +27,7 @@ import CardMessage from '@/components/chat/CardMessage.vue'
 import EmojiMessage from '@/components/chat/EmojiMessage.vue'
 import GroupInviteMessage from '@/components/chat/GroupInviteMessage.vue'
 import NoteMessage from '@/components/chat/NoteMessage.vue'
+import SystemNoticeMessage from '@/components/chat/SystemNoticeMessage.vue'
 import UnsupportedCustomTip from '@/components/chat/UnsupportedCustomTip.vue'
 import AddContactModal from '@/components/contact/AddContactModal.vue'
 import { useDemoCreateGroup } from '@/composables/useDemoCreateGroup'
@@ -41,6 +42,7 @@ import { isCardMessage } from '@/utils/cardMessage'
 import { isEmojiMessage } from '@/utils/customEmojiMessage'
 import { isGroupInviteMessage } from '@/utils/groupInviteMessage'
 import { isNoteMessage } from '@/utils/noteMessage'
+import { isSystemNoticeMessage } from '@/utils/systemNoticeMessage'
 import { isUnsupportedCustomMessage } from '@/utils/customMessage'
 import { trackEvent } from '@/utils/analytics'
 import {
@@ -388,7 +390,8 @@ watch(
             <MarkdownStreamMessage :message="message as UiMessage" />
           </template>
           <!-- 自定义消息：bidirectional 走系统样式；emoji 渲染为裸图；note 渲染为笔记卡片；
-               card/userCard 渲染为名片卡片；均支持点击预览；其余不支持的显示提示；支持的回落内置 -->
+               card/userCard 渲染为名片卡片；groupInviteV1 渲染为邀请卡片；notice 渲染为
+               居中灰色系统文案（进群/退群提示）；其余不支持的显示提示 -->
           <template #message-custom="{ message }">
             <BidirectionalMessage
               v-if="isBidirectionalMessage(message as UiMessage)"
@@ -408,6 +411,10 @@ watch(
             />
             <GroupInviteMessage
               v-else-if="isGroupInviteMessage(message as UiMessage)"
+              :message="message as UiMessage"
+            />
+            <SystemNoticeMessage
+              v-else-if="isSystemNoticeMessage(message as UiMessage)"
               :message="message as UiMessage"
             />
             <UnsupportedCustomTip
@@ -490,6 +497,10 @@ watch(
             />
             <GroupInviteMessage
               v-else-if="isGroupInviteMessage(message as UiMessage)"
+              :message="message as UiMessage"
+            />
+            <SystemNoticeMessage
+              v-else-if="isSystemNoticeMessage(message as UiMessage)"
               :message="message as UiMessage"
             />
             <UnsupportedCustomTip
@@ -638,11 +649,13 @@ watch(
 </style>
 
 <!-- 非 scoped：#message-custom 插槽只替换消息内容，外层 wrapper 仍带头像/昵称/气泡。
-     用 :has() 命中含本项目锚点类（.unsupported-custom-tip / .bidirectional-tip）的消息行，
-     抵消其外壳并居中，外观与 UIKit 系统消息（notice）一致。锚点类为本组件独有，不误伤其它消息。 -->
+     用 :has() 命中含本项目锚点类（.unsupported-custom-tip / .bidirectional-tip /
+     .system-notice-tip）的消息行，抵消其外壳并居中，外观与 UIKit 系统消息（notice）一致。
+     锚点类为本组件独有，不误伤其它消息。 -->
 <style lang="scss">
 .message-bubble-wrapper:has(.unsupported-custom-tip),
-.message-bubble-wrapper:has(.bidirectional-tip) {
+.message-bubble-wrapper:has(.bidirectional-tip),
+.message-bubble-wrapper:has(.system-notice-tip) {
   justify-content: center;
 
   .message-bubble-wrapper__main {
