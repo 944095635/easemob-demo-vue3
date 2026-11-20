@@ -29,6 +29,14 @@
   margin-top: 12px !important;
 }
 
+// 群信息抽屉里的群成员数「(N)」跟随聊天页同一套显隐规则（对齐 App ChatAppbarWidget）：
+// 群隐藏成员且当前账号非 VIP / 非群主管理员时，随 header 人数后缀一并隐藏。
+// class 由 chat/index.vue 依据 useGroupMemberCountVisibility 的 showMemberCount 动态挂载。
+// UIKit 组件样式由异步 chunk 注入、加载顺序不稳定，故使用 !important。
+.chat-page--hide-member-count .chat-info-drawer__count {
+  display: none !important;
+}
+
 // 覆盖 nprogress 顶部进度条颜色
 #nprogress .bar {
   background: var(--color-primary);

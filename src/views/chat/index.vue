@@ -351,7 +351,14 @@ watch(
 </script>
 
 <template>
-  <div class="chat-page" :class="{ 'chat-page--pc': !isMobileView }">
+  <div
+    class="chat-page"
+    :class="{
+      'chat-page--pc': !isMobileView,
+      // 群隐藏成员且非 VIP / 非管理员时，连群信息抽屉里的群成员数一并隐藏（对齐 App）
+      'chat-page--hide-member-count': !showMemberCount,
+    }"
+  >
     <!-- PC 端：左侧会话列表 + 右侧聊天窗口（容器间距对齐 UIKit demo，见 DEMO_CONTAINER_CONFIG） -->
     <template v-if="!isMobileView">
       <!-- 会话列表宽度默认 360px，可拖拽定宽（240~480），拖拽后持久化到 UIKIT 内部配置存储 -->
