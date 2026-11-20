@@ -63,16 +63,28 @@ function fileSizeOf(body: BodyRecord): number {
   return num(body.size ?? body.fileSize ?? body.file_size ?? file.size)
 }
 
-/** 是否对该消息展示「收藏」菜单项：排除 voice / card，以及不支持的自定义事件 */
+/**
+ * 是否对该消息展示「收藏」菜单项（对齐 App message_item.dart:637-649）。
+ *
+ * App 菜单条件只有一条：`message.type != .voice && message.type != .card`，
+ * 即：语音、名片不显示收藏，其余类型（text/image/video/file/location/note/emoji 等）都显示。
+ * Web 端没有 App 的 MsgType.card 原生名片类型，名片以 custom 的 card/userCard event 表达
+ * （cardMessage.ts），这里一并视作名片排除。bidirectional/groupInviteV1/notice 等自定义消息
+ * 对应 App 的 bidirectional/groupInvite/system/tips——App 分派里无 collect 分支，点了无反应，
+ * 故同样不展示收藏。
+ */
 export function canCollectMessage(message: UiMessage): boolean {
   const type = message.type as string
+  // 语音、原生名片消息不显示（App: type != voice && type != card）
   if (type === 'voice' || type === 'card') return false
   if (type === 'text' || type === 'image' || type === 'video' || type === 'file' || type === 'location') {
     return true
   }
   if (type === 'custom') {
     const event = getCustomEvent(message)
-    return event === 'note' || event === 'emoji' || event === 'card' || event === 'userCard'
+    // 仅笔记 / 表情可收藏；名片(card/userCard)在 App 属 MsgType.card 被菜单排除，
+    // 群邀请/系统提示/双向消息在 App 分派里无 collect 分支，均不显示收藏。
+    return event === 'note' || event === 'emoji'
   }
   return false
 }

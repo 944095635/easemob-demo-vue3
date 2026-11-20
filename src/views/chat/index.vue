@@ -483,7 +483,12 @@ watch(
           </template>
           <!-- 右键/长按菜单追加「收藏」（对齐 App message_item.dart 的收藏项） -->
           <template #message-action-extra="{ message }">
-            <div :ref="placeCollectItem" class="chat-collect-action" @click="onCollectMessage(message as UiMessage)">
+            <div
+              v-if="canCollectMessage(message as UiMessage)"
+              :ref="placeCollectItem"
+              class="chat-collect-action"
+              @click="onCollectMessage(message as UiMessage)"
+            >
               <EmIcon name="status/star" :size="16" />
               <span>{{ t('favorite.collectAction') }}</span>
             </div>
@@ -576,7 +581,12 @@ watch(
             </template>
             <!-- 右键/长按菜单追加「收藏」（对齐 App message_item.dart 的收藏项） -->
             <template #message-action-extra="{ message }">
-              <div :ref="placeCollectItem" class="chat-collect-action" @click="onCollectMessage(message as UiMessage)">
+              <div
+                v-if="canCollectMessage(message as UiMessage)"
+                :ref="placeCollectItem"
+                class="chat-collect-action"
+                @click="onCollectMessage(message as UiMessage)"
+              >
                 <EmIcon name="status/star" :size="16" />
                 <span>{{ t('favorite.collectAction') }}</span>
               </div>

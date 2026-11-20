@@ -19,17 +19,19 @@ describe('消息是否显示收藏菜单（对齐 App message_item.dart）', () 
     }
   })
 
-  it('语音与名片不显示收藏', () => {
+  it('语音、原生名片、自定义名片都不显示收藏（对齐 App 的 voice/card 排除）', () => {
     expect(canCollectMessage(msg('voice'))).toBe(false)
     expect(canCollectMessage(msg('card'))).toBe(false)
+    expect(canCollectMessage(customMsg('card'))).toBe(false)
+    expect(canCollectMessage(customMsg('userCard'))).toBe(false)
   })
 
-  it('note/emoji/card 自定义消息可收藏，其它自定义事件不可', () => {
+  it('仅 note/emoji 自定义消息显示收藏；群邀请/系统提示/双向消息不显示', () => {
     expect(canCollectMessage(customMsg('note'))).toBe(true)
     expect(canCollectMessage(customMsg('emoji'))).toBe(true)
-    expect(canCollectMessage(customMsg('card'))).toBe(true)
     expect(canCollectMessage(customMsg('groupInviteV1'))).toBe(false)
     expect(canCollectMessage(customMsg('notice'))).toBe(false)
+    expect(canCollectMessage(customMsg('bidirectional'))).toBe(false)
   })
 })
 
