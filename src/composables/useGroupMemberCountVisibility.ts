@@ -11,6 +11,10 @@
  * 没有「群成员已隐藏」文案态，故此处只决定「露不露人数」这一布尔值：
  *   showMemberCount = !isHideMember || isVip || isOwnerOrManager
  *
+ * 群详情抽屉的「成员列表」是另一套条件（App chat_setup_group_page.dart）：
+ *   showGroupMemberList = !isHideMember || isOwnerOrManager
+ * 注意列表条件不含 VIP —— VIP 只被允许看到群人数，隐藏成员时仍看不到成员列表。
+ *
  * 数据来源：
  * - hide_member_list / my_role：自有服务端群资料 GET /api/group/{id}（loadGroupDetail 自带缓存+pending 去重）；
  * - is_vip：当前登录用户完整资料（useCurrentProfile，登录时拉取）；
@@ -34,6 +38,14 @@ let activeGroupId = ''
 /** 群角色中可查看隐藏成员的人数：群主 / 管理员 */
 const OWNER_OR_MANAGER_ROLES = ['owner', 'admin']
 
+/** 解析隐藏标记与当前用户角色（查不到群资料时按 App 语义当「隐藏」） */
+function resolveVisibility(detail: GroupDetail | undefined, fallbackRole?: string | number) {
+  const isHideMember = detail?.hide_member_list ?? true
+  const role = detail?.my_role ?? fallbackRole
+  const isOwnerOrManager = OWNER_OR_MANAGER_ROLES.includes(String(role))
+  return { isHideMember, isOwnerOrManager }
+}
+
 /**
  * 纯判断函数：给定群资料 / VIP / 兜底角色，是否显示人数后缀。
  * 抽出便于单测覆盖 App 规则的各个分支。
@@ -47,13 +59,22 @@ export function computeShowMemberCount(
   isVip: boolean,
   fallbackRole?: string | number,
 ): boolean {
-  // 查不到群资料时按 App 语义当「隐藏」
-  const isHideMember = detail?.hide_member_list ?? true
+  const { isHideMember, isOwnerOrManager } = resolveVisibility(detail, fallbackRole)
   if (!isHideMember) return true
-
-  const role = detail?.my_role ?? fallbackRole
-  const isOwnerOrManager = OWNER_OR_MANAGER_ROLES.includes(String(role))
   return isVip || isOwnerOrManager
+}
+
+/**
+ * 纯判断函数：群详情抽屉是否显示「成员列表」（搜索框 + 成员头像网格）。
+ * 对齐 App chat_setup_group_page.dart 的 `if (!isHideMember || isOwnerOrManager)`：
+ * 隐藏成员时仅群主 / 管理员可见列表，**VIP 不包含在内**（VIP 只被允许看到人数）。
+ */
+export function computeShowGroupMemberList(
+  detail: GroupDetail | undefined,
+  fallbackRole?: string | number,
+): boolean {
+  const { isHideMember, isOwnerOrManager } = resolveVisibility(detail, fallbackRole)
+  return !isHideMember || isOwnerOrManager
 }
 
 export function useGroupMemberCountVisibility() {
@@ -98,5 +119,18 @@ export function useGroupMemberCountVisibility() {
     return computeShowMemberCount(detail, isVip, fallbackRole)
   })
 
-  return { showMemberCount, load }
+  /**
+   * 群详情抽屉是否显示成员列表。与人数不同：隐藏成员时仅群主 / 管理员可见，
+   * VIP 不在此列（沿用同一份群资料与角色兜底，不重复发请求）。
+   */
+  const showGroupMemberList = computed(() => {
+    const groupId = currentGroupId.value
+    if (!groupId) return true
+
+    const detail = groupDetailMap.value[groupId]
+    const fallbackRole = stores.group.getGroupById(groupId)?.role
+    return computeShowGroupMemberList(detail, fallbackRole)
+  })
+
+  return { showMemberCount, showGroupMemberList, load }
 }

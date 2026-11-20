@@ -29,11 +29,19 @@
   margin-top: 12px !important;
 }
 
-// 群信息抽屉里的群成员数「(N)」跟随聊天页同一套显隐规则（对齐 App ChatAppbarWidget）：
-// 群隐藏成员且当前账号非 VIP / 非群主管理员时，随 header 人数后缀一并隐藏。
-// class 由 chat/index.vue 依据 useGroupMemberCountVisibility 的 showMemberCount 动态挂载。
+// 群信息抽屉的人数 / 成员列表分别套用 App 的两套不同显隐规则：
+// - 人数 "(N)" 跟随 header 的 showMemberCount：隐藏成员时 VIP / 群主管理员可见（ChatAppbarWidget）；
+// - 成员列表（搜索框 + 头像网格）条件更严：!isHideMember || isOwnerOrManager，
+//   隐藏成员时 VIP 也看不到列表，仅群主 / 管理员可见（chat_setup_group_page.dart）。
+// 列表隐藏时保留「群成员」标题行，故只隐藏内部的搜索框与成员区，不隐藏整节。
+// class 由 chat/index.vue 依据 useGroupMemberCountVisibility 的两个计算值动态挂载。
 // UIKit 组件样式由异步 chunk 注入、加载顺序不稳定，故使用 !important。
 .chat-page--hide-member-count .chat-info-drawer__count {
+  display: none !important;
+}
+
+.chat-page--hide-group-members .chat-info-drawer__section-group .chat-info-drawer__fake-search,
+.chat-page--hide-group-members .chat-info-drawer__section-group .chat-info-drawer__section {
   display: none !important;
 }
 

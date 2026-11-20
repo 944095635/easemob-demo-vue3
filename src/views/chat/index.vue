@@ -70,7 +70,7 @@ const hasCurrentConversation = computed(() => !!currentConversation.value)
 const { load: loadGroupAnnouncement } = useGroupAnnouncement()
 
 /* ===== 群人数后缀可见性：按 App 规则由「是否隐藏群成员」+「当前账号 VIP / 群角色」动态决定 ===== */
-const { showMemberCount } = useGroupMemberCountVisibility()
+const { showMemberCount, showGroupMemberList } = useGroupMemberCountVisibility()
 
 interface ConversationLike {
   id: string
@@ -355,8 +355,10 @@ watch(
     class="chat-page"
     :class="{
       'chat-page--pc': !isMobileView,
-      // 群隐藏成员且非 VIP / 非管理员时，连群信息抽屉里的群成员数一并隐藏（对齐 App）
+      // 人数后缀：隐藏成员且非 VIP / 非群主管理员时隐藏（对齐 App ChatAppbarWidget）
       'chat-page--hide-member-count': !showMemberCount,
+      // 成员列表：隐藏成员且非群主 / 管理员时隐藏（对齐 App chat_setup_group_page.dart，VIP 不含在内）
+      'chat-page--hide-group-members': !showGroupMemberList,
     }"
   >
     <!-- PC 端：左侧会话列表 + 右侧聊天窗口（容器间距对齐 UIKit demo，见 DEMO_CONTAINER_CONFIG） -->
