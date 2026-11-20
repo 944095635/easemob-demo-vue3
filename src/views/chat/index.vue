@@ -25,6 +25,7 @@ import MarkdownStreamMessage from '@/components/ai/MarkdownStreamMessage.vue'
 import BidirectionalMessage from '@/components/chat/BidirectionalMessage.vue'
 import CardMessage from '@/components/chat/CardMessage.vue'
 import EmojiMessage from '@/components/chat/EmojiMessage.vue'
+import GroupInviteMessage from '@/components/chat/GroupInviteMessage.vue'
 import NoteMessage from '@/components/chat/NoteMessage.vue'
 import UnsupportedCustomTip from '@/components/chat/UnsupportedCustomTip.vue'
 import AddContactModal from '@/components/contact/AddContactModal.vue'
@@ -38,6 +39,7 @@ import { getMockAiReply, simulateStreamMessage } from '@/composables/useStreamDe
 import { isBidirectionalMessage } from '@/utils/bidirectionalMessage'
 import { isCardMessage } from '@/utils/cardMessage'
 import { isEmojiMessage } from '@/utils/customEmojiMessage'
+import { isGroupInviteMessage } from '@/utils/groupInviteMessage'
 import { isNoteMessage } from '@/utils/noteMessage'
 import { isUnsupportedCustomMessage } from '@/utils/customMessage'
 import { trackEvent } from '@/utils/analytics'
@@ -404,6 +406,10 @@ watch(
               v-else-if="isCardMessage(message as UiMessage)"
               :message="message as UiMessage"
             />
+            <GroupInviteMessage
+              v-else-if="isGroupInviteMessage(message as UiMessage)"
+              :message="message as UiMessage"
+            />
             <UnsupportedCustomTip
               v-else-if="isUnsupportedCustomMessage(message as UiMessage)"
               :message="message as UiMessage"
@@ -480,6 +486,10 @@ watch(
             />
             <CardMessage
               v-else-if="isCardMessage(message as UiMessage)"
+              :message="message as UiMessage"
+            />
+            <GroupInviteMessage
+              v-else-if="isGroupInviteMessage(message as UiMessage)"
               :message="message as UiMessage"
             />
             <UnsupportedCustomTip

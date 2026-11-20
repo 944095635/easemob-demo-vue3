@@ -22,6 +22,9 @@ import type { UiMessage } from '@easemob-community/uikit-im'
  *   插槽）。params 里的 title/images 渲染为笔记卡片，不能显示 event/params 原文。
  * - card / userCard：名片消息，由 CardMessage 组件渲染（见 chat/index.vue #message-custom
  *   插槽）。params 里的 uid/name/avatar 渲染为名片卡片，不能显示 event/params 原文。
+ * - groupInviteV1：群邀请消息，由 GroupInviteMessage 组件渲染（见 chat/index.vue
+ *   #message-custom 插槽）。params 里的 groupName/groupAvatar 渲染为群邀请卡片，点击
+ *   打开群邀请详情弹窗，不能显示 event/params 原文。
  * 其余 custom 消息走「请用手机 App 查看」提示。
  */
 const SUPPORTED_CUSTOM_EVENTS = new Set<string>([
@@ -30,6 +33,7 @@ const SUPPORTED_CUSTOM_EVENTS = new Set<string>([
   'note',
   'card',
   'userCard',
+  'groupInviteV1',
 ])
 
 /** 取自定义消息的 event 标识；非 custom 或无 event 时返回空串 */

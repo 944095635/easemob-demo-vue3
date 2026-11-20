@@ -33,6 +33,16 @@ export default {
     noteFallback: 'Note',
     cardLabel: 'Business Card',
     cardExpired: 'This business card has expired',
+    groupInvite: {
+      title: 'Invites you to join a group',
+      inviteWithName: 'invites you to join a group',
+      members: ' members',
+      reject: 'Decline',
+      accept: 'Accept',
+      accepted: 'Joined the group',
+      rejected: 'Invitation declined',
+      expired: 'This invitation has expired',
+    },
     messagePreview: {
       image: 'Image',
       card: 'Business Card',

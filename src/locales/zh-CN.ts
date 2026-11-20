@@ -33,6 +33,16 @@ export default {
     noteFallback: '笔记',
     cardLabel: '名片',
     cardExpired: '名片已过期',
+    groupInvite: {
+      title: '邀请你加入群聊',
+      inviteWithName: '邀请你加入群聊',
+      members: '人',
+      reject: '拒绝邀请',
+      accept: '同意加入',
+      accepted: '已同意进群',
+      rejected: '已拒绝进群',
+      expired: '该群邀请已失效',
+    },
     messagePreview: {
       image: '图片',
       card: '名片',
