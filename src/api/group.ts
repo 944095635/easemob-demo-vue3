@@ -23,6 +23,8 @@ export interface GroupDetail {
   notice?: string | null
   member_count?: number
   max_member?: number
+  /** 是否隐藏群成员（对齐 Flutter GroupInfo.hideMemberList / json["hide_member_list"]） */
+  hide_member_list?: boolean
   owner_id?: string
   my_role?: string | number
   my_nickname?: string

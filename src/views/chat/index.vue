@@ -33,6 +33,7 @@ import UnsupportedCustomTip from '@/components/chat/UnsupportedCustomTip.vue'
 import { useDemoCreateGroup } from '@/composables/useDemoCreateGroup'
 import { useDemoSettings } from '@/composables/useDemoSettings'
 import { useGroupAnnouncement } from '@/composables/useGroupAnnouncement'
+import { useGroupMemberCountVisibility } from '@/composables/useGroupMemberCountVisibility'
 import { useMobileTabbar } from '@/composables/useMobileTabbar'
 import { useMobileView } from '@/composables/useMobileView'
 import { useSidebarWidth } from '@/composables/useSidebarWidth'
@@ -67,6 +68,9 @@ const hasCurrentConversation = computed(() => !!currentConversation.value)
 
 /* ===== 群公告：点击群会话时拉取自有服务端群资料，写入 UIKit group store ===== */
 const { load: loadGroupAnnouncement } = useGroupAnnouncement()
+
+/* ===== 群人数后缀可见性：按 App 规则由「是否隐藏群成员」+「当前账号 VIP / 群角色」动态决定 ===== */
+const { showMemberCount } = useGroupMemberCountVisibility()
 
 interface ConversationLike {
   id: string
@@ -224,6 +228,9 @@ const { sidebarWidth, persistSidebarWidth } = useSidebarWidth('layout_sidebar_wi
 /* ===== 聊天UIKit 特性开关配置（由特性抽屉「聊天」面板驱动） ===== */
 const chatConfig = computed(() => ({
   ...DEMO_CHAT_CONFIG,
+  // 群人数后缀：对齐 App ChatAppbarWidget——群隐藏成员时仅 VIP / 群主 / 管理员露出人数，
+  // 普通成员不显示；未隐藏成员时正常显示。由 useGroupMemberCountVisibility 动态计算。
+  header: { showMemberCount: showMemberCount.value },
   // 抽屉挤出模式（对齐 UIKit demo 默认档）：好友 / 群信息面板作为独立平面区域挤压聊天区，
   // 与聊天主区之间的间隙透出外层灰底；'overlay' 则为遮挡式浮层
   drawer: { mode: 'push' as const },
