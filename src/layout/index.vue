@@ -63,6 +63,14 @@ const tabs: NavTab[] = [
     to: '/contacts',
     size: 24,
   },
+  {
+    key: 'favorite',
+    icon: 'status/star',
+    activeIcon: 'filled/circle/star',
+    label: t('nav.favorite'),
+    to: '/favorite',
+    size: 24,
+  },
 ]
 
 /** 当前路由命中时返回面性图标，否则返回线性图标 */

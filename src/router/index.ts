@@ -52,6 +52,12 @@ const routes: RouteRecordRaw[] = [
         meta: { title: 'contacts.apply.title' },
       },
       {
+        path: 'favorite',
+        name: 'Favorite',
+        component: () => import('@/views/favorite/index.vue'),
+        meta: { title: 'nav.favorite' },
+      },
+      {
         path: 'settings',
         name: 'Settings',
         component: () => import('@/views/settings/index.vue'),
