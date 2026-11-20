@@ -20,6 +20,7 @@ import { useDemoCreateGroup } from '@/composables/useDemoCreateGroup'
 import { useDemoSettings } from '@/composables/useDemoSettings'
 import { useMobileView } from '@/composables/useMobileView'
 import { useSidebarWidth } from '@/composables/useSidebarWidth'
+import ContactActions from '@/components/contact/ContactActions.vue'
 import { DEMO_ICON_SIZE, DEMO_RESIZABLE_CONFIG, DEMO_SIDEBAR_CONFIG } from '@/config/demo'
 
 defineOptions({ name: 'ContactsPage' })
@@ -213,7 +214,12 @@ function backToContactList() {
           :user-id="detailUserId"
           @send-message="onSendMessageToUser"
           @deleted="onContactDeleted"
-        />
+        >
+          <!-- 替换 UIKit 内置删除：走自有服务接口（对齐 App 好友管理流程） -->
+          <template #footer="{ userId, blocked }">
+            <ContactActions :user-id="userId" :blocked="blocked" @deleted="onContactDeleted" />
+          </template>
+        </EmContactDetail>
         <EmGroupDetail
           v-else-if="detailGroupId"
           :group-id="detailGroupId"
@@ -268,7 +274,11 @@ function backToContactList() {
             :user-id="detailUserId"
             @send-message="onSendMessageToUser"
             @deleted="onContactDeleted"
-          />
+          >
+            <template #footer="{ userId, blocked }">
+              <ContactActions :user-id="userId" :blocked="blocked" @deleted="onContactDeleted" />
+            </template>
+          </EmContactDetail>
           <EmGroupDetail
             v-else-if="detailGroupId"
             :group-id="detailGroupId"

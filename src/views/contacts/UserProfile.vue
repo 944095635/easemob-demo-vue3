@@ -11,6 +11,7 @@ import { useRoute, useRouter } from 'vue-router'
 import {
   CONVERSATION_TYPE,
   EmIcon,
+  EmModal,
   useContact,
   useConversation,
   useToast,
@@ -20,6 +21,7 @@ import {
 import { getUserDetail, type UserDetail } from '@/api/friend'
 import { resolveFriendSource } from '@/config/friendSource'
 import { DEMO_ICON_SIZE } from '@/config/demo'
+import { useContactDelete } from '@/composables/useContactDelete'
 import { useUserStore } from '@/store/modules/user'
 import { trackEvent } from '@/utils/analytics'
 
@@ -33,6 +35,10 @@ const { error: showError, success: showSuccess } = useToast()
 const { stores } = useUIKit()
 const { selectConversation } = useConversation()
 const { contactList } = useContact()
+const { deleteContact } = useContactDelete()
+
+const deleteModalVisible = ref(false)
+const deleting = ref(false)
 
 const userId = computed(() => String(route.params.userId || ''))
 const numericUserId = computed(() => Number.parseInt(userId.value, 10) || 0)
@@ -142,6 +148,18 @@ function goBack() {
   if (window.history.state?.back) router.back()
   else router.push('/contacts/search')
 }
+
+async function confirmDelete() {
+  if (deleting.value) return
+  deleting.value = true
+  try {
+    const ok = await deleteContact(userId.value, numericUserId.value)
+    if (ok) goBack()
+  } finally {
+    deleteModalVisible.value = false
+    deleting.value = false
+  }
+}
 </script>
 
 <template>
@@ -211,19 +229,37 @@ function goBack() {
     </div>
 
     <footer class="user-profile__footer">
-      <button v-if="isSelf" type="button" class="user-profile__primary" disabled>
-        {{ t('contacts.profile.self') }}
-      </button>
-      <button v-else-if="isBlocked" type="button" class="user-profile__primary" disabled>
-        {{ t('contacts.profile.blocked') }}
-      </button>
-      <button v-else-if="isFriend" type="button" class="user-profile__primary" @click="sendMessage">
-        {{ t('contacts.profile.sendMessage') }}
-      </button>
-      <button v-else type="button" class="user-profile__primary" @click="openApply">
-        {{ t('contacts.profile.addFriend') }}
-      </button>
+      <div class="user-profile__actions">
+        <button v-if="isSelf" type="button" class="user-profile__primary" disabled>
+          {{ t('contacts.profile.self') }}
+        </button>
+        <button v-else-if="isBlocked" type="button" class="user-profile__primary" disabled>
+          {{ t('contacts.profile.blocked') }}
+        </button>
+        <template v-else-if="isFriend">
+          <button type="button" class="user-profile__primary" @click="sendMessage">
+            {{ t('contacts.profile.sendMessage') }}
+          </button>
+          <button type="button" class="user-profile__danger" @click="deleteModalVisible = true">
+            {{ t('contacts.deleteFriend.action') }}
+          </button>
+        </template>
+        <button v-else type="button" class="user-profile__primary" @click="openApply">
+          {{ t('contacts.profile.addFriend') }}
+        </button>
+      </div>
     </footer>
+
+    <EmModal
+      v-model:show="deleteModalVisible"
+      :title="t('contacts.deleteFriend.title')"
+      :confirm-text="t('contacts.deleteFriend.confirmButton')"
+      type="danger"
+      @confirm="confirmDelete"
+      @cancel="deleteModalVisible = false"
+    >
+      <p class="user-profile__delete-tip">{{ t('contacts.deleteFriend.confirm') }}</p>
+    </EmModal>
   </div>
 </template>
 
@@ -402,6 +438,34 @@ function goBack() {
       background: var(--uikit-color-disabled, #c9d1d6);
       cursor: not-allowed;
     }
+  }
+
+  &__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  &__danger {
+    width: 100%;
+    height: 40px;
+    border: 1px solid var(--color-danger, #f53f3f);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--color-danger, #f53f3f);
+    font-size: 15px;
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+      background: color-mix(in srgb, var(--color-danger, #f53f3f) 8%, transparent);
+    }
+  }
+
+  &__delete-tip {
+    margin: 0;
+    font-size: calc(14px * var(--demo-font-scale, 1));
+    line-height: 1.5;
+    color: var(--color-text-secondary);
   }
 }
 </style>

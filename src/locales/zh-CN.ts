@@ -160,6 +160,16 @@ export default {
       addSuccess: '好友申请已发送',
       errorRequired: '请输入手机号或用户 ID',
     },
+    deleteFriend: {
+      action: '删除好友',
+      title: '删除好友',
+      confirm: '确定要删除好友吗？',
+      confirmButton: '确定',
+      success: '好友已删除',
+      failed: '删除失败',
+      block: '拉黑',
+      unblock: '取消拉黑',
+    },
     search: {
       title: '搜索用户',
       placeholder: '输入铁恋 ID 或手机号',

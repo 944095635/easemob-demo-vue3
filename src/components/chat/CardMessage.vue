@@ -3,30 +3,31 @@
  * 名片消息（event === 'card' / 'userCard'）渲染，对齐 Flutter MessageCardRender：
  * - 卡片内容：32px 圆形头像 + 显示名（单行省略、w500）+ 分割线 + 灰色「名片」角标；
  * - maxWidth 220，padding 10px 14px、圆角 12（与 NoteMessage 卡片一致）；
- * - 点击整张卡片打开 UIKit 用户名片弹窗 EmUserCardModal（对齐 Flutter
- *   UserInfoPage.toByUserId(card.userId, source: .card)）；
+ * - 点击整张卡片跳转 UserProfile 页（对齐 Flutter UserInfoPage.toByUserId(card.userId, .card)），
+ *   在该页完成查看资料 / 加好友 / 删除好友，删除统一走自有服务接口；
  * - userId <= 0 时点击提示「名片已过期」（对齐 Flutter chat_page.dart 的 toast）。
  *
  * Flutter 会在渲染时用 ProfileService.getProfile 异步刷新显示名/VIP/备注，但 params 已
  * 自包含 uid/name/avatar，Web 端直接展示 params 内容；VIP 与备注信息 params 不携带，
- * 由点击后的 EmUserCardModal 展示完整资料。
+ * 由点击后的 UserProfile 页展示完整资料。
  *
  * 头像的 OSS/CDN 防盗链由全局 <img src> 改写走 /oss-cdn 代理（src/utils/avatarSrcRewrite.ts）。
  * 通过 EmChatContainer 的 #message-custom 插槽接管，见 src/views/chat/index.vue。
  */
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { EmUserCardModal, useToast } from '@easemob-community/uikit-im'
+import { useRouter } from 'vue-router'
+import { useToast } from '@easemob-community/uikit-im'
 import type { UiMessage } from '@easemob-community/uikit-im'
 
 import { getCardView } from '@/utils/cardMessage'
 
 const props = defineProps<{ message: UiMessage }>()
 const { t } = useI18n()
+const router = useRouter()
 const { show: showToast } = useToast()
 
 const card = computed(() => getCardView(props.message))
-const cardVisible = ref(false)
 
 /** 首字占位：头像缺失时避免空 src 请求当前页面 */
 const avatarFallback = computed(() => (card.value.name || '?').trim().charAt(0).toUpperCase())
@@ -36,7 +37,15 @@ function openCard(): void {
     showToast(t('chat.cardExpired'))
     return
   }
-  cardVisible.value = true
+  router.push({
+    name: 'ContactUserProfile',
+    params: { userId: String(card.value.userId) },
+    query: {
+      nickname: card.value.name,
+      avatar: card.value.avatar,
+      source: 'card',
+    },
+  })
 }
 </script>
 
@@ -51,12 +60,6 @@ function openCard(): void {
     </div>
     <div class="card-message__divider"></div>
     <div class="card-message__label">{{ t('chat.cardLabel') }}</div>
-
-    <EmUserCardModal
-      :show="cardVisible"
-      :user-id="card.chatUserId"
-      @update:show="cardVisible = $event"
-    />
   </div>
 </template>
 

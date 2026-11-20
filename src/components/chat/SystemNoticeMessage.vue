@@ -3,28 +3,33 @@
  * 系统通知消息（event === 'notice'）渲染，对齐 Flutter SystemMsg / MessageSystemRender：
  * - 展示 params.text 的灰色小字，居中、无头像无气泡（外层 wrapper 由 chat/index.vue 的
  *   全局样式抵消）；
- * - params.operator / members 中的昵称渲染为蓝色可点击，点击打开 UIKit 用户名片
- *   （对齐 Flutter MessageSystemRender.onTapUser → UserInfoPage.to）；
+ * - params.operator / members 中的昵称渲染为蓝色可点击，点击跳到 UserProfile 页
+ *   （对齐 Flutter MessageSystemRender.onTapUser → UserInfoPage.to，删除好友走自有接口）；
  * - 进群/退群/被移出群等提示都走这条链路，不再显示「请使用手机 App 查看」。
  *
  * 通过 EmChatContainer 的 #message-custom 插槽接管，见 src/views/chat/index.vue。
  */
-import { computed, ref } from 'vue'
-import { EmUserCardModal } from '@easemob-community/uikit-im'
+import { computed } from 'vue'
+import { useRouter } from 'vue-router'
 import type { UiMessage } from '@easemob-community/uikit-im'
 
 import { getSystemNoticeView } from '@/utils/systemNoticeMessage'
+import { toNumericUserId } from '@/utils/friendUserId'
 
 const props = defineProps<{ message: UiMessage }>()
 
+const router = useRouter()
 const notice = computed(() => getSystemNoticeView(props.message))
-const cardVisible = ref(false)
-const selectedUserId = ref('')
 
 function openUserCard(chatUserId: string): void {
   if (!chatUserId) return
-  selectedUserId.value = chatUserId
-  cardVisible.value = true
+  let userId: number
+  try {
+    userId = toNumericUserId(chatUserId)
+  } catch {
+    return
+  }
+  router.push({ name: 'ContactUserProfile', params: { userId: String(userId) } })
 }
 </script>
 
@@ -39,12 +44,6 @@ function openUserCard(chatUserId: string): void {
       >
       <template v-else>{{ segment.text }}</template>
     </template>
-
-    <EmUserCardModal
-      :show="cardVisible"
-      :user-id="selectedUserId"
-      @update:show="cardVisible = $event"
-    />
   </div>
 </template>
 

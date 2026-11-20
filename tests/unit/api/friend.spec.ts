@@ -3,7 +3,7 @@ import { createPinia, setActivePinia } from 'pinia'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import request from '@/api/request'
-import { getUserDetail, searchUsers, sendFriendApply } from '@/api/friend'
+import { deleteFriend, getUserDetail, searchUsers, sendFriendApply } from '@/api/friend'
 
 const base = import.meta.env.VITE_API_BASE_URL || ''
 const prefix = /(?:^|\/)api\/?$/.test(base) ? '' : '/api'
@@ -147,6 +147,25 @@ describe('friend api', () => {
       remark: '老王',
       source: 'search_mobile',
     })
+  })
+
+  it('deleteFriend 调 DELETE /friend/{userId} 并携带签名', async () => {
+    mock.onDelete(`${prefix}/friend/300009`).reply((config) => {
+      expect(config.headers?.['X-Sign']).toBeTruthy()
+      expect(config.data).toBeUndefined()
+      return [200, { code: 0, message: 'ok', data: null }]
+    })
+
+    await expect(deleteFriend(300009)).resolves.toBeUndefined()
+  })
+
+  it('deleteFriend 对非好友错误码抛出服务端 msg', async () => {
+    mock.onDelete(`${prefix}/friend/300009`).reply(200, {
+      code: 130007,
+      msg: '非好友关系',
+      data: null,
+    })
+    await expect(deleteFriend(300009)).rejects.toThrow('非好友关系')
   })
 
   it('业务错误用 msg 字段时也能正确 reject（对齐 Flutter ApiResponse）', async () => {

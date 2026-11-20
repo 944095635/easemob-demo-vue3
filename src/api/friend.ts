@@ -4,6 +4,7 @@
  * - POST /api/user/search  { keyword }                       搜索用户（铁恋号 / 手机号）
  * - GET  /api/user/{id}?easemob_group_id=...                 获取用户资料
  * - POST /api/friend/apply { to_user_id, message, remark, source }  发送好友申请
+ * - DELETE /api/friend/{userId}                                   删除好友（对齐 Flutter FriendApi.deleteFriend）
  *
  * 请求头：X-Sign / X-Timestamp / Authorization / platform / version（见 requestSign.ts）。
  * Web 使用登录页输入的 webApiToken 作为 Authorization（request.ts 拦截器统一注入）。
@@ -191,5 +192,17 @@ export async function sendFriendApply({
   if (remark?.trim()) body.remark = remark.trim()
   await http.post<void>(apiPath('/friend/apply'), body, {
     headers: createRequestSignHeaders(body),
+  })
+}
+
+/**
+ * 删除好友：DELETE /api/friend/{userId}
+ * 对齐 Flutter FriendApi.deleteFriend：无 body / query，userId 走 path，
+ * 错误码 130007 表示非好友关系（提示文案由 request.ts 统一抛出）。
+ */
+export async function deleteFriend(userId: number): Promise<void> {
+  if (!userId || !Number.isFinite(userId)) throw new Error('用户 ID 无效')
+  await http.delete<void>(apiPath(`/friend/${userId}`), {
+    headers: createRequestSignHeaders(),
   })
 }

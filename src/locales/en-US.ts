@@ -161,6 +161,16 @@ export default {
       addSuccess: 'Friend request sent',
       errorRequired: 'Please enter a phone number or user ID',
     },
+    deleteFriend: {
+      action: 'Delete friend',
+      title: 'Delete friend',
+      confirm: 'Are you sure you want to delete this friend?',
+      confirmButton: 'Confirm',
+      success: 'Friend deleted',
+      failed: 'Delete failed',
+      block: 'Block',
+      unblock: 'Unblock',
+    },
     search: {
       title: 'Search users',
       placeholder: 'Tielian ID or phone number',
