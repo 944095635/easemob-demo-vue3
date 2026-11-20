@@ -3,7 +3,16 @@ import { createPinia, setActivePinia } from 'pinia'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import request from '@/api/request'
-import { deleteFriend, getUserDetail, searchUsers, sendFriendApply } from '@/api/friend'
+import {
+  clearFriendRequests,
+  deleteFriend,
+  deleteFriendRequest,
+  getFriendRequests,
+  getUserDetail,
+  handleFriendRequest,
+  searchUsers,
+  sendFriendApply,
+} from '@/api/friend'
 
 const base = import.meta.env.VITE_API_BASE_URL || ''
 const prefix = /(?:^|\/)api\/?$/.test(base) ? '' : '/api'
@@ -171,5 +180,110 @@ describe('friend api', () => {
   it('业务错误用 msg 字段时也能正确 reject（对齐 Flutter ApiResponse）', async () => {
     mock.onGet(`${prefix}/error-msg`).reply(200, { code: 130002, msg: '已是好友', data: null })
     await expect(request.get(`${prefix}/error-msg`)).rejects.toThrow('已是好友')
+  })
+
+  /* ===== 好友申请列表（对齐 Flutter UserRequestsPage） ===== */
+
+  it('getFriendRequests 用 page/page_size 查列表并映射申请字段', async () => {
+    mock.onGet(`${prefix}/friend/requests`).reply((config) => {
+      expect(config.params).toEqual({ page: 1, page_size: 20 })
+      expect(config.headers?.['X-Sign']).toBeTruthy()
+      return [
+        200,
+        {
+          code: 0,
+          msg: 'ok',
+          data: {
+            list: [
+              {
+                id: 77,
+                user_id: 300009,
+                nickname: '懂得都懂',
+                avatar: 'https://cdn.example.com/a.png',
+                message: '我想添加你为好友',
+                remark: '老王',
+                status: 'pending',
+                created_at: 1784035945,
+                source: 'search_chat_id',
+              },
+            ],
+            total: 1,
+            page: 1,
+            page_size: 20,
+          },
+        },
+      ]
+    })
+
+    const page = await getFriendRequests(1, 20)
+    expect(page.total).toBe(1)
+    expect(page.list).toEqual([
+      {
+        id: 77,
+        userId: 300009,
+        nickname: '懂得都懂',
+        avatar: 'https://cdn.example.com/a.png',
+        message: '我想添加你为好友',
+        remark: '老王',
+        status: 'pending',
+        createdAt: 1784035945,
+        source: 'search_chat_id',
+      },
+    ])
+  })
+
+  it('getFriendRequests 兼容直接数组返回，缺省分页字段回退入参', async () => {
+    mock.onGet(`${prefix}/friend/requests`).reply(200, {
+      code: 0,
+      msg: 'ok',
+      data: [{ id: 1, user_id: 2, status: 'accepted' }],
+    })
+    const page = await getFriendRequests(2, 15)
+    expect(page.page).toBe(2)
+    expect(page.pageSize).toBe(15)
+    expect(page.total).toBe(0)
+    expect(page.list[0]).toMatchObject({ id: 1, userId: 2, status: 'accepted' })
+  })
+
+  it('handleFriendRequest 提交 request_id/action 并参与签名，remark 为空不发送', async () => {
+    let body: Record<string, unknown> | undefined
+    mock.onPost(`${prefix}/friend/request/handle`).reply((config) => {
+      body = JSON.parse(config.data as string) as Record<string, unknown>
+      expect(config.headers?.['X-Sign']).toBeTruthy()
+      return [200, { code: 0, msg: 'ok', data: null }]
+    })
+    await handleFriendRequest(77, 'accept')
+    expect(body).toEqual({ request_id: 77, action: 'accept' })
+  })
+
+  it('handleFriendRequest 携带 remark，并透传 reject', async () => {
+    let body: Record<string, unknown> | undefined
+    mock.onPost(`${prefix}/friend/request/handle`).reply((config) => {
+      body = JSON.parse(config.data as string) as Record<string, unknown>
+      return [200, { code: 0, msg: 'ok', data: null }]
+    })
+    await handleFriendRequest(88, 'reject', '  小美  ')
+    expect(body).toEqual({ request_id: 88, action: 'reject', remark: '小美' })
+  })
+
+  it('deleteFriendRequest 调 DELETE /friend/request/{id}', async () => {
+    mock.onDelete(`${prefix}/friend/request/77`).reply((config) => {
+      expect(config.headers?.['X-Sign']).toBeTruthy()
+      return [200, { code: 0, msg: 'ok', data: null }]
+    })
+    await expect(deleteFriendRequest(77)).resolves.toBeUndefined()
+  })
+
+  it('clearFriendRequests 调 DELETE /friend/requests/clear', async () => {
+    mock.onDelete(`${prefix}/friend/requests/clear`).reply((config) => {
+      expect(config.headers?.['X-Sign']).toBeTruthy()
+      return [200, { code: 0, msg: 'ok', data: null }]
+    })
+    await expect(clearFriendRequests()).resolves.toBeUndefined()
+  })
+
+  it('好友申请接口无效 ID 时不发请求直接抛错', async () => {
+    await expect(handleFriendRequest(0, 'accept')).rejects.toThrow('申请 ID 无效')
+    await expect(deleteFriendRequest(0)).rejects.toThrow('申请 ID 无效')
   })
 })
