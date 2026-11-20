@@ -205,7 +205,7 @@ pnpm format      # Prettier 格式化
 ## 开发说明
 
 - 路径别名：`@` 指向 `src/`
-- 开发环境接口代理：`/api` -> `VITE_PROXY_TARGET`（见 `vite.config.ts`）；生产环境 `VITE_API_BASE_URL=/api` 需由部署侧（如 Nginx）将 `/api` 同路径代理到后端服务
+- 开发环境接口代理：`/api` -> `VITE_PROXY_TARGET`（当前为自有 API 服务 `https://htlv2api.cntlyun.com.cn`，见 `vite.config.ts`）；生产环境 `VITE_API_BASE_URL` 直连该服务，跨域需服务端放行
 - HTTP 封装：`src/api/request.ts` 的 `http.get<T> / http.post<T> / http.put<T> / http.delete<T>` 已做统一拆包与类型声明（自动注入 token、401 统一跳转登录）；共享类型见 `src/types/index.d.ts`
 - 登录态链路：路由守卫 `meta.requiresAuth` 控制页面访问，未登录跳 `/login` 并携带 `redirect` 回跳；登录成功后 `useUserStore().setToken(...)` 即放行
 - 自研 `vue3-uikit` 本地联调时，可在 `vite.config.ts` 的 `resolve.alias` 中指向其源码目录

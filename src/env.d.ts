@@ -4,10 +4,11 @@
 declare const __SDK_VERSION__: string
 
 interface ImportMetaEnv {
+  /** 通用接口基地址：dev 为 /api 同源代理，生产 / Electron 直连自有 API 服务 */
   readonly VITE_API_BASE_URL: string
   /** 请求超时时间（毫秒），未配置时默认 15000 */
   readonly VITE_API_TIMEOUT?: string
-  /** 环信 Demo App Server 地址，用于头像上传、注销账户等接口 */
+  /** 自有 App Server 地址（登录、用户、头像等接口） */
   readonly VITE_APP_SERVER_URL?: string
   /** 阿里云验证码 2.0（仅生产环境，配置在 .env.production.local，不入库） */
   readonly VITE_CAPTCHA_SCENE_ID?: string

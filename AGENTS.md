@@ -71,7 +71,7 @@ pnpm release     # 正式打版：node scripts/release.mjs <major|minor|patch>�
 ## 架构要点
 
 - **路径别名**：`@` 指向 `src/`（`vite.config.ts` 与 `tsconfig.app.json` 均已配置），导入 src 内模块一律使用 `@/`。
-- **接口代理**：开发环境 `/api` 代理到 `VITE_PROXY_TARGET`（默认 `http://localhost:8080`），代理时去掉 `/api` 前缀。
+- **接口代理**：开发环境 `/api` 代理到 `VITE_PROXY_TARGET`（当前为自有 API 服务 `https://htlv2api.cntlyun.com.cn`），代理时去掉 `/api` 前缀；生产构建直连 `VITE_API_BASE_URL`，需服务端放行跨域。
 - **环境变量**：仅暴露 `VITE_` 前缀变量；新增变量需在 `src/env.d.ts` 的 `ImportMetaEnv` 中补充类型声明。`VITE_API_TIMEOUT` 为请求超时（毫秒），未配置时 request 默认 15000。
 - **HTTP 封装**：`src/api/request.ts` 中 axios 实例读取 `VITE_API_BASE_URL` 作为 baseURL、`VITE_API_TIMEOUT` 作为超时；请求拦截器自动注入 `Authorization: Bearer <token>`；响应拦截器按后端统一结构 `{ code, message, data }` 拆包，`code !== 0` 视为业务错误并 reject，HTTP 401 时清除登录态并跳转 `/login`（带 `redirect` 参数，防抖避免并发重复跳转）。**接口模块一律用类型友好的 `http.get<T> / http.post<T> / http.put<T> / http.delete<T>`（`src/api/request.ts` 导出）声明返回类型，不要直接用 `request.post<unknown, unknown>(...)`**；共享响应类型见 `src/types/index.d.ts`（`ApiResult` / `PageQuery` / `PageResult` / `LoginResult`）。
 - **路由**：全部页面组件使用动态 `import()` 懒加载；`beforeEach` 守卫负责 NProgress、登录态校验（`meta.requiresAuth`，未登录访问受保护页跳 `/login` 并携带 `redirect`，已登录访问 `/login` 跳 `/chat`）与页面标题（`meta.title` 存 i18n key，标题后缀为「环信 IM Demo」）；`/` 重定向到 `/chat`，未知路径落到 404 页。
