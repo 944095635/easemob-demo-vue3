@@ -1,7 +1,8 @@
 import type { EmojiStickerPack } from '@easemob-community/uikit-im'
 import type { UiContact } from '@easemob-community/uikit-im'
 
-import { HUANXIN_EMOJI_META, buildDemoStickerExt, resolveStickerLastMessageText } from './sticker'
+import { resolveDemoLastMessageText } from './messagePreview'
+import { HUANXIN_EMOJI_META, buildDemoStickerExt } from './sticker'
 
 /**
  * 项目 Demo 配置常量
@@ -187,7 +188,7 @@ export const DEMO_STICKER_PACKS: EmojiStickerPack[] = [
  * 通过 EmChatContainer 的 `config` prop 传入（PC / H5 布局共用）。
  */
 export const DEMO_CHAT_CONFIG = {
-  lastMessageTextResolver: resolveStickerLastMessageText,
+  lastMessageTextResolver: resolveDemoLastMessageText,
   input: {
     /** 输入框是否显示发送按钮：对齐 UIKit demo，默认关闭（回车发送） */
     showSendButton: false,

@@ -34,6 +34,11 @@ export default {
     cardExpired: '名片已过期',
     messagePreview: {
       image: '图片',
+      card: '名片',
+      emoji: '表情',
+      note: '笔记',
+      groupInvite: '群邀请',
+      notice: '通知',
     },
     sticker: {
       fallback: '动画表情',

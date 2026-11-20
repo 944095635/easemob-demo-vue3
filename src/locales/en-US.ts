@@ -34,6 +34,11 @@ export default {
     cardExpired: 'This business card has expired',
     messagePreview: {
       image: 'Image',
+      card: 'Business Card',
+      emoji: 'Sticker',
+      note: 'Note',
+      groupInvite: 'Group Invitation',
+      notice: 'Notice',
     },
     sticker: {
       fallback: 'Animated Sticker',
