@@ -227,6 +227,9 @@ const chatConfig = computed(() => ({
   // 抽屉挤出模式（对齐 UIKit demo 默认档）：好友 / 群信息面板作为独立平面区域挤压聊天区，
   // 与聊天主区之间的间隙透出外层灰底；'overlay' 则为遮挡式浮层
   drawer: { mode: 'push' as const },
+  // 隐藏群文件入口：聊天详情抽屉与群管理面板的「群文件/共享文件」入口均读该开关，
+  // 关闭后两处入口一并消失（群文件消息本身仍可正常收发展示）。
+  groupManagement: { showSharedFiles: false },
   groupReadReceipt: {
     enabled: groupReadReceiptEnabled.value,
     maxGroupSize: groupReadReceiptMaxSize.value,

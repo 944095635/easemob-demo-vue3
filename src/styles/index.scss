@@ -11,6 +11,15 @@
   display: none !important;
 }
 
+// 隐藏聊天详情抽屉里的「群文件」入口。
+// 群管理面板的「共享文件」入口已由 chatConfig.groupManagement.showSharedFiles=false 关闭，
+// 但 UIKit 3.13.0 的 chat-info-drawer 在渲染该入口时仅判断 isGroup、漏判了 showSharedFiles，
+// 故用 CSS 兜底。定位依据：settings 区里带箭头的 cell 只有「查找聊天记录」与「群文件」，
+// 群文件是其中最后一个（其后只剩不带箭头的「消息免打扰 / 会话置顶」）。
+.chat-info-drawer__settings > .uikit-cell:has(.uikit-cell__arrow):not(:has(~ .uikit-cell .uikit-cell__arrow)) {
+  display: none !important;
+}
+
 // 覆盖 nprogress 顶部进度条颜色
 #nprogress .bar {
   background: var(--color-primary);
